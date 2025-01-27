@@ -3,128 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Incognito Mode and Device Info</title>
+    <title>Device and Browser Information</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 30px;
+            margin: 20px;
         }
-        .status {
-            font-size: 18px;
-            margin-top: 20px;
-            padding: 10px;
+        .info-block {
+            margin: 20px 0;
+            padding: 15px;
             border: 1px solid #ddd;
             border-radius: 8px;
-            background-color: #f9f9f9;
-            white-space: pre-wrap;
+            background: #f9f9f9;
             max-width: 800px;
-            margin: auto;
         }
         .pixel-status {
-            font-size: 18px;
-            margin-top: 20px;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 8px;
-            background-color: #eaf5ea;
-            white-space: pre-wrap;
-            max-width: 800px;
-            margin: auto;
+            background: #eaf5ea;
+            margin-top: 10px;
+            color: #333;
         }
     </style>
 </head>
 <body>
-    <h1>Incognito Mode and Device Info</h1>
-    <p>This page shows details about your browser, storage, and whether incognito mode is detected.</p>
-    
-    <div id="infoDisplay" class="status">Fetching information...</div>
-    <div id="pixelStatus" class="pixel-status">Invisible Tracking Pixel Status: Checking...</div>
+    <h1>Device and Browser Information</h1>
+    <div class="info-block" id="deviceInfo">Fetching device information...</div>
+    <div class="pixel-status" id="pixelStatus">Checking Google Analytics tracking pixel...</div>
 
     <script>
-        async function gatherData() {
-            const statusDiv = document.getElementById('infoDisplay');
-            const pixelStatusDiv = document.getElementById('pixelStatus');
+        async function getDeviceInfo() {
+            const infoDiv = document.getElementById("deviceInfo");
             let output = "";
 
-            // User-Agent and Browser Info
-            output += `User-Agent: ${navigator.userAgent}\n`;
-            output += `Platform: ${navigator.platform}\n`;
-            output += `Language: ${navigator.language}\n`;
-            output += `Hardware Concurrency (CPU Cores): ${navigator.hardwareConcurrency || "N/A"}\n`;
-            output += `Device Memory (RAM): ${navigator.deviceMemory || "N/A"} GB\n`;
-            output += `Online Status: ${navigator.onLine ? "Online" : "Offline"}\n\n`;
+            // User Agent
+            output += `User Agent: ${navigator.userAgent}\n`;
 
-            // Storage API - Quota and Used Storage
-            if (navigator.storage && navigator.storage.estimate) {
-                try {
-                    const { quota, usage } = await navigator.storage.estimate();
-                    const quotaMB = (quota / (1024 * 1024)).toFixed(2); // Convert bytes to MB
-                    const usageMB = (usage / (1024 * 1024)).toFixed(2); // Convert bytes to MB
-                    output += `Storage Quota: ${quotaMB} MB\n`;
-                    output += `Used Storage: ${usageMB} MB\n`;
-                } catch (error) {
-                    output += "Error fetching Storage API.\n";
+            // Graphics Card Name / Driver
+            output += `Graphics Card / Driver: Cannot be fetched directly with JavaScript\n`;
+
+            // System (Live) Time
+            const currentDate = new Date();
+            output += `System Time (UTC): ${currentDate.toUTCString()}\n`;
+
+            // Number of Cores
+            output += `Number of CPU Cores: ${navigator.hardwareConcurrency || "Not available"}\n`;
+
+            // Memory (RAM)
+            output += `Memory (RAM): ${navigator.deviceMemory || "Not available"} GB\n`;
+
+            // Battery Status
+            if (navigator.getBattery) {
+                const battery = await navigator.getBattery();
+                output += `Battery Level: ${(battery.level * 100).toFixed(0)}%\n`;
+                output += `Charging: ${battery.charging ? "Yes" : "No"}\n`;
+                if (!battery.charging) {
+                    output += `Time Remaining: ${battery.dischargingTime > 0 ? (battery.dischargingTime / 60).toFixed(2) + " hours" : "Unknown"}\n`;
                 }
-            }
-
-            // FileSystem API
-            const fs = window.RequestFileSystem || window.webkitRequestFileSystem;
-            if (fs) {
-                fs(window.TEMPORARY, 100, 
-                    () => output += "FileSystem API: Normal Mode\n", 
-                    () => output += "FileSystem API: Incognito Mode\n");
             } else {
-                output += "FileSystem API: Not Supported\n";
+                output += "Battery Status: Not supported\n";
             }
 
-            // IndexedDB
+            // Device Pointing Method
+            output += `Device Pointing Method:\n`;
+            output += `Mouse: Cannot detect\n`;
+            output += `Touchscreen: ${'ontouchstart' in window ? "Yes" : "No"}\n`;
+
+            // Languages
+            output += `Languages: ${navigator.languages.join(", ")}\n`;
+
+            // Storage Information
+            output += `Storage:\n`;
             try {
-                const request = window.indexedDB.open("test");
-                request.onsuccess = () => {
-                    output += "IndexedDB: Normal Mode\n";
-                    request.result.close();
-                    indexedDB.deleteDatabase("test");
-                };
-                request.onerror = () => output += "IndexedDB: Incognito Mode\n";
-            } catch (e) {
-                output += "IndexedDB: Error\n";
+                const { quota, usage } = await navigator.storage.estimate();
+                output += `  Quota: ${(quota / (1024 * 1024)).toFixed(2)} MB\n`;
+                output += `  Usage: ${(usage / (1024 * 1024)).toFixed(2)} MB\n`;
+            } catch {
+                output += "  Storage: Not available\n";
             }
+            output += `  IndexedDB: ${window.indexedDB ? "Allowed" : "Blocked"}\n`;
+            output += `  Local Storage: ${window.localStorage ? "Allowed" : "Blocked"}\n`;
+            output += `  Session Storage: ${window.sessionStorage ? "Allowed" : "Blocked"}\n`;
 
-            // LocalStorage
-            try {
-                localStorage.setItem("test", "test");
-                localStorage.removeItem("test");
-                output += "LocalStorage: Normal Mode\n";
-            } catch (e) {
-                output += "LocalStorage: Incognito Mode\n";
-            }
+            // Browser Window Size
+            output += `Browser Window Size:\n`;
+            output += `  Outer: ${window.outerWidth} x ${window.outerHeight} (pixels)\n`;
+            output += `  Inner: ${window.innerWidth} x ${window.innerHeight} (pixels)\n`;
 
-            // Cache Storage
-            try {
-                await caches.open("test-cache");
-                output += "Cache Storage: Normal Mode\n";
-            } catch (e) {
-                output += "Cache Storage: Incognito Mode\n";
-            }
+            // Screen Information
+            output += `Screen:\n`;
+            output += `  Orientation: ${screen.orientation.type}\n`;
+            output += `  Resolution: ${screen.width} x ${screen.height} (pixels)\n`;
+            output += `  Aspect Ratio: ${screen.width}:${screen.height}\n`;
+            output += `  Device Pixel Ratio: ${window.devicePixelRatio}\n`;
+            output += `  Color Depth: ${screen.colorDepth}-bit\n`;
 
-            // Grabify Tracking Link (Replace YOUR_GRABIFY_TRACKING_LINK with actual Grabify URL)
-            const image = new Image();
-            image.onload = function() {
-                pixelStatusDiv.textContent = "Invisible Tracking Pixel: Loaded Successfully";
-                pixelStatusDiv.style.backgroundColor = "#d4edda";  // Green background for success
-            };
-            image.onerror = function() {
-                pixelStatusDiv.textContent = "Invisible Tracking Pixel: Blocked or Not Loaded";
-                pixelStatusDiv.style.backgroundColor = "#f8d7da";  // Red background for block
-            };
-            image.src = "https://www.google-analytics.com/collect";  // Replace with your Grabify tracking link
+            // Do Not Track
+            output += `Do Not Track: ${navigator.doNotTrack === "1" ? "Enabled" : "Disabled"}\n`;
 
-            // Output all gathered data
-            statusDiv.textContent = output;
+            // Display collected info
+            infoDiv.textContent = output;
         }
 
-        gatherData();
+        // Google Analytics Tracking Pixel
+        function checkPixel() {
+            const pixelStatusDiv = document.getElementById("pixelStatus");
+            const image = new Image();
+            image.onload = function() {
+                pixelStatusDiv.textContent = "Google Analytics Pixel: Loaded Successfully";
+                pixelStatusDiv.style.backgroundColor = "#d4edda"; // Green for success
+            };
+            image.onerror = function() {
+                pixelStatusDiv.textContent = "Google Analytics Pixel: Blocked";
+                pixelStatusDiv.style.backgroundColor = "#f8d7da"; // Red for blocked
+            };
+
+            // Using Google Analytics tracking pixel URL
+            image.src = "https://www.google-analytics.com/collect?v=1&t=event&tid=UA-000000-2&cid=555&ec=category&ea=action&el=label&ev=1";
+        }
+
+        // Run both functions
+        getDeviceInfo();
+        checkPixel();
     </script>
 </body>
 </html>
