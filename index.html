@@ -38,12 +38,12 @@
             return result;
         }
 
-        // Function to get a stored item
+        // Function to get a stored item from localStorage
         function getStoredItem(name) {
             return localStorage.getItem(name);
         }
 
-        // Function to set a stored item
+        // Function to set a stored item in localStorage
         function setStoredItem(name, value) {
             localStorage.setItem(name, value);
         }
@@ -57,25 +57,27 @@
 
         // Function to detect if Firefox Extensions are supported (Offline)
         function detectFirefoxExtensions() {
-            // If the "mozExtension" feature is available, Firefox extensions are supported
             try {
-                return 'Yes'; // Firefox has support for extensions by default
+                // Check if the browser is Firefox by checking for the presence of browser.runtime
+                if (typeof browser !== 'undefined' && browser.runtime) {
+                    return 'Yes'; // Firefox supports the WebExtension API
+                }
+                return 'No'; // Not Firefox
             } catch (e) {
-                return 'No'; // If accessing any extension-related feature fails, return No
+                return 'No'; // In case of any error (which should not happen)
             }
         }
 
-        // Function to detect mobile/desktop
-        function detectDeviceType() {
-            if ('ontouchstart' in window) {
-                if (window.innerWidth < window.innerHeight) {
-                    return "Mobile Device (Portrait Mode)";
-                } else {
-                    return "Mobile Device (Landscape Mode)";
-                }
+        // Function to increment page load count
+        function incrementPageLoadCount() {
+            let loadCount = getStoredItem("pageLoadCount");
+            if (loadCount) {
+                loadCount = parseInt(loadCount) + 1;
             } else {
-                return "Desktop";
+                loadCount = 1;
             }
+            setStoredItem("pageLoadCount", loadCount);
+            return loadCount;
         }
 
         async function displayDeviceInfo() {
@@ -92,15 +94,19 @@
             // 2. Display the random code (Stored)
             output += `<div class="info-line">Random Code (Stored): ${userCode}</div>`;
 
-            // 3. Page Request Date & Time (Local Time)
+            // 3. Display the number of page loads
+            const pageLoadCount = incrementPageLoadCount();
+            output += `<div class="info-line">Page Load Count: ${pageLoadCount}</div>`;
+
+            // 4. Page Request Date & Time (Local Time)
             const pageRequestDate = new Date();
             output += `<div class="info-line">Page Request Date & Time: ${pageRequestDate.toLocaleString()} (Local Time)</div>`;
 
-            // 4. Browser Build Number / Identifier (User Agent)
+            // 5. Browser Build Number / Identifier (User Agent)
             const userAgent = navigator.userAgent;
             output += `<div class="info-line">Browser Build Number / Identifier: ${userAgent}</div>`;
 
-            // 5. Battery Status (Time remaining before discharge)
+            // 6. Battery Status (Time remaining before discharge)
             if (navigator.getBattery) {
                 const battery = await navigator.getBattery();
                 output += `<div class="info-line">Battery Level: ${(battery.level * 100).toFixed(0)}%</div>`;
@@ -109,11 +115,10 @@
                 output += `<div class="info-line">Battery Status: Not supported</div>`;
             }
 
-            // 6. Graphics Card Name / Driver (Using WebGL info)
+            // 7. Graphics Card Name / Driver (Using WebGL info)
             const canvas = document.createElement("canvas");
             const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
             let graphicsCard = "Unknown";
-
             if (gl) {
                 const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
                 if (debugInfo) {
@@ -123,13 +128,13 @@
             }
             output += `<div class="info-line">Graphics Card Name / Driver: ${graphicsCard}</div>`;
 
-            // 7. Device Input Method (Touchscreen or Mouse)
+            // 8. Device Input Method (Touchscreen or Mouse)
             output += `<div class="info-line">Touchscreen: ${"ontouchstart" in window ? "Yes" : "No"}</div>`;
 
-            // 8. Languages
+            // 9. Languages
             output += `<div class="info-line">Languages: ${navigator.languages.join(", ")}</div>`;
 
-            // 9. Storage Information
+            // 10. Storage Information
             if (navigator.storage && navigator.storage.estimate) {
                 try {
                     const { quota, usage } = await navigator.storage.estimate();
@@ -142,16 +147,9 @@
                 output += `<div class="info-line">Storage API: Not supported</div>`;
             }
 
-            // 10. Browser Window Size
-            output += `<div class="info-line">Browser Outer Size: ${window.outerWidth} x ${window.outerHeight} pixels</div>`;
-            output += `<div class="info-line">Browser Inner Size: ${window.innerWidth} x ${window.innerHeight} pixels</div>`;
-
             // 11. Screen Information
-            output += `<div class="info-line">Screen Orientation: ${screen.orientation.type}</div>`;
             output += `<div class="info-line">Screen Resolution: ${screen.width} x ${screen.height} pixels</div>`;
-            output += `<div class="info-line">Aspect Ratio: ${screen.width}:${screen.height}</div>`;
             output += `<div class="info-line">Device Pixel Ratio: ${window.devicePixelRatio}</div>`;
-            output += `<div class="info-line">Color Depth: ${screen.colorDepth}-bit</div>`;
 
             // 12. Do Not Track
             output += `<div class="info-line">Do Not Track: ${navigator.doNotTrack === "1" ? "Enabled" : "Disabled"}</div>`;
@@ -162,10 +160,7 @@
             // 14. Firefox Extensions Support
             output += `<div class="info-line">Firefox Extensions Supported: ${detectFirefoxExtensions()}</div>`;
 
-            // 15. Device Type (Mobile/Desktop)
-            output += `<div class="info-line">Most likely Device Type: ${detectDeviceType()}</div>`;
-
-            // 16. Time Zone
+            // 15. Time Zone
             const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             output += `<div class="info-line">Time Zone: ${timeZone}</div>`;
 
