@@ -28,7 +28,6 @@
     <div id="pixelStatus">Checking Google Analytics tracking pixel...</div>
 
     <script>
-        // Function to generate a random 5-character alphanumeric code
         function generateRandomCode() {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             let result = '';
@@ -38,29 +37,24 @@
             return result;
         }
 
-        // Function to get a stored item
         function getStoredItem(name) {
             return localStorage.getItem(name);
         }
 
-        // Function to set a stored item
         function setStoredItem(name, value) {
             localStorage.setItem(name, value);
         }
 
-        // Function to check if cookies are allowed
         function checkCookies() {
             document.cookie = "testcookie=true; path=/";
             const cookiesEnabled = document.cookie.indexOf("testcookie=true") !== -1;
             return cookiesEnabled ? 'Allowed' : 'Blocked';
         }
 
-        // Function to detect Bluetooth support
         function detectBluetooth() {
             return "bluetooth" in navigator ? 'Yes' : 'No';
         }
 
-        // Function to detect microphone and speakers
         async function detectMediaDevices() {
             let speakers = 'No';
             let microphones = 'No';
@@ -79,14 +73,11 @@
                         camera = 'Yes';
                     }
                 });
-            } catch (e) {
-                console.error('Error detecting media devices:', e);
-            }
+            } catch (e) {}
 
             return { speakers, microphones, camera };
         }
 
-        // Function to detect Bluetooth adapter (Connected)
         async function detectBluetoothAdapter() {
             if (navigator.bluetooth) {
                 try {
@@ -94,41 +85,35 @@
                         acceptAllDevices: true,
                         optionalServices: ['battery_service']
                     });
-                    return 'Yes'; // If device is found, return Yes for Bluetooth adapter
+                    return 'Yes';
                 } catch (e) {
-                    return 'No'; // If user cancels or no device is found
+                    return 'No';
                 }
             }
-            return 'No'; // No Bluetooth API support
+            return 'No';
         }
 
         async function displayDeviceInfo() {
             const infoDiv = document.getElementById("deviceInfo");
             let output = "";
 
-            // 1. Check for the stored random code
             let userCode = getStoredItem("userCode");
             if (!userCode) {
                 userCode = generateRandomCode();
-                setStoredItem("userCode", userCode); // Save to localStorage
+                setStoredItem("userCode", userCode);
             }
 
-            // 2. Display the random code (Stored)
             output += `<div class="info-line">Random Code (Stored): ${userCode}</div>`;
 
-            // 3. Page Request Date & Time (Local Time)
             const pageRequestDate = new Date();
             output += `<div class="info-line">Page Request Date & Time: ${pageRequestDate.toLocaleString()} (Local Time)</div>`;
 
-            // 4. Time Zone
             const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             output += `<div class="info-line">Time Zone: ${timeZone}</div>`;
 
-            // 5. Browser Build Number / Identifier (User Agent)
             const userAgent = navigator.userAgent;
             output += `<div class="info-line">Browser Build Number / Identifier: ${userAgent}</div>`;
 
-            // 6. Battery Status (Time remaining before discharge)
             if (navigator.getBattery) {
                 const battery = await navigator.getBattery();
                 output += `<div class="info-line">Battery Level: ${(battery.level * 100).toFixed(0)}%</div>`;
@@ -142,7 +127,6 @@
                 output += `<div class="info-line">Battery Status: Not supported</div>`;
             }
 
-            // 7. Graphics Card Name / Driver (Using WebGL info)
             const canvas = document.createElement("canvas");
             const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
             let graphicsCard = "Unknown";
@@ -156,13 +140,9 @@
             }
             output += `<div class="info-line">Graphics Card Name / Driver: ${graphicsCard}</div>`;
 
-            // 8. Device Input Method (Touchscreen or Mouse)
             output += `<div class="info-line">Touchscreen: ${"ontouchstart" in window ? "Yes" : "No"}</div>`;
-
-            // 9. Languages
             output += `<div class="info-line">Languages: ${navigator.languages.join(", ")}</div>`;
 
-            // 10. Storage Information
             if (navigator.storage && navigator.storage.estimate) {
                 try {
                     const { quota, usage } = await navigator.storage.estimate();
@@ -175,27 +155,19 @@
                 output += `<div class="info-line">Storage API: Not supported</div>`;
             }
 
-            // 11. Browser Window Size
             output += `<div class="info-line">Browser Outer Size: ${window.outerWidth} x ${window.outerHeight} pixels</div>`;
             output += `<div class="info-line">Browser Inner Size: ${window.innerWidth} x ${window.innerHeight} pixels</div>`;
 
-            // 12. Screen Information
             output += `<div class="info-line">Screen Orientation: ${screen.orientation.type}</div>`;
             output += `<div class="info-line">Screen Resolution: ${screen.width} x ${screen.height} pixels</div>`;
             output += `<div class="info-line">Aspect Ratio: ${screen.width}:${screen.height}</div>`;
             output += `<div class="info-line">Device Pixel Ratio: ${window.devicePixelRatio}</div>`;
             output += `<div class="info-line">Color Depth: ${screen.colorDepth}-bit</div>`;
 
-            // 13. Do Not Track
             output += `<div class="info-line">Do Not Track: ${navigator.doNotTrack === "1" ? "Enabled" : "Disabled"}</div>`;
-
-            // 14. Cookies Status
             output += `<div class="info-line">Cookies: ${checkCookies()}</div>`;
-
-            // 15. Bluetooth Support
             output += `<div class="info-line">Bluetooth Support: ${detectBluetooth()}</div>`;
 
-            // 16. Media Devices (Speakers, Microphones, Camera)
             const mediaDevices = await detectMediaDevices();
             output += `<div class="info-line">Speakers: ${mediaDevices.speakers}</div>`;
             output += `<div class="info-line">Number of Speakers: ${mediaDevices.speakers === 'Yes' ? 1 : 0}</div>`;
@@ -204,9 +176,13 @@
             output += `<div class="info-line">Camera: ${mediaDevices.camera}</div>`;
             output += `<div class="info-line">Number of Cameras: ${mediaDevices.camera === 'Yes' ? 1 : 0}</div>`;
 
-            // 17. Bluetooth Adapter (Connected)
             const bluetoothAdapter = await detectBluetoothAdapter();
             output += `<div class="info-line">Bluetooth Adapter Connected: ${bluetoothAdapter}</div>`;
 
-            // 18. Firefox Extensions Support
-            output += `<div class="info-line">Firefox Extensions Supported:
+            infoDiv.innerHTML = output;
+        }
+
+        displayDeviceInfo();
+    </script>
+</body>
+</html>
