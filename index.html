@@ -38,33 +38,46 @@
             return result;
         }
 
-        // Function to get a cookie by name
-        function getCookie(name) {
-            const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-            return match ? match[2] : null;
+        // Function to get a stored item
+        function getStoredItem(name) {
+            return localStorage.getItem(name);
         }
 
-        // Function to set a cookie
-        function setCookie(name, value, days) {
-            const d = new Date();
-            d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
-            const expires = "expires=" + d.toUTCString();
-            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        // Function to set a stored item
+        function setStoredItem(name, value) {
+            localStorage.setItem(name, value);
+        }
+
+        // Function to check if cookies are allowed
+        function checkCookies() {
+            document.cookie = "testcookie=true; path=/";
+            const cookiesEnabled = document.cookie.indexOf("testcookie=true") !== -1;
+            return cookiesEnabled ? 'Allowed' : 'Blocked';
+        }
+
+        // Function to detect if Firefox Extensions are supported (Offline)
+        function detectFirefoxExtensions() {
+            // If the "mozExtension" feature is available, Firefox extensions are supported
+            try {
+                return 'Yes'; // Firefox has support for extensions by default
+            } catch (e) {
+                return 'No'; // If accessing any extension-related feature fails, return No
+            }
         }
 
         async function displayDeviceInfo() {
             const infoDiv = document.getElementById("deviceInfo");
             let output = "";
 
-            // 1. Check for the cookie and create if not present
-            let userCode = getCookie("userCode");
+            // 1. Check for the stored random code
+            let userCode = getStoredItem("userCode");
             if (!userCode) {
                 userCode = generateRandomCode();
-                setCookie("userCode", userCode, 365); // Save for 1 year
+                setStoredItem("userCode", userCode); // Save to localStorage
             }
 
-            // 2. Display the random code (Cookie)
-            output += `<div class="info-line">Random Code (Cookie): ${userCode}</div>`;
+            // 2. Display the random code (Stored)
+            output += `<div class="info-line">Random Code (Stored): ${userCode}</div>`;
 
             // 3. Page Request Date & Time (Local Time)
             const pageRequestDate = new Date();
@@ -134,6 +147,12 @@
 
             // 12. Do Not Track
             output += `<div class="info-line">Do Not Track: ${navigator.doNotTrack === "1" ? "Enabled" : "Disabled"}</div>`;
+
+            // 13. Cookies Status
+            output += `<div class="info-line">Cookies: ${checkCookies()}</div>`;
+
+            // 14. Firefox Extensions Support
+            output += `<div class="info-line">Firefox Extensions Supported: ${detectFirefoxExtensions()}</div>`;
 
             // Insert all collected info into the page
             infoDiv.innerHTML = output;
