@@ -104,104 +104,104 @@ output += `<div class="info-line">Number of Cameras: ${mediaDevices.cameraCount}
         }
 
         async function displayDeviceInfo() {
-            const infoDiv = document.getElementById("deviceInfo");
-            let output = "";
+    const infoDiv = document.getElementById("deviceInfo");
+    let output = "";  // Initialize output as an empty string.
 
-            let userCode = getStoredItem("userCode");
-            if (!userCode) {
-                userCode = generateRandomCode();
-                setStoredItem("userCode", userCode);
-            }
+    let userCode = getStoredItem("userCode");
+    if (!userCode) {
+        userCode = generateRandomCode();
+        setStoredItem("userCode", userCode);
+    }
 
-            output += `<div class="info-line">Random Code (Stored): ${userCode}</div>`;
+    output += `<div class="info-line">Random Code (Stored): ${userCode}</div>`;
 
-            const pageRequestDate = new Date();
-            output += `<div class="info-line">Page Request Date & Time: ${pageRequestDate.toLocaleString()} (Local Time)</div>`;
+    const pageRequestDate = new Date();
+    output += `<div class="info-line">Page Request Date & Time: ${pageRequestDate.toLocaleString()} (Local Time)</div>`;
 
-            const userAgent = navigator.userAgent;
-            output += `<div class="info-line">User Agent: ${userAgent}</div>`;
+    const userAgent = navigator.userAgent;
+    output += `<div class="info-line">User Agent: ${userAgent}</div>`;
 
-            if (navigator.getBattery) {
-                const battery = await navigator.getBattery();
-                output += `<div class="info-line">Battery Level: ${(battery.level * 100).toFixed(0)}%</div>`;
-                output += `<div class="info-line">Charging: ${battery.charging ? "Yes" : "No"}</div>`;
-            } else {
-                output += `<div class="info-line">Battery Status: Not supported</div>`;
-            }
+    if (navigator.getBattery) {
+        const battery = await navigator.getBattery();
+        output += `<div class="info-line">Battery Level: ${(battery.level * 100).toFixed(0)}%</div>`;
+        output += `<div class="info-line">Charging: ${battery.charging ? "Yes" : "No"}</div>`;
+    } else {
+        output += `<div class="info-line">Battery Status: Not supported</div>`;
+    }
 
-            const canvas = document.createElement("canvas");
-            const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-            let graphicsCard = "Unknown";
+    const canvas = document.createElement("canvas");
+    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    let graphicsCard = "Unknown";
 
-            if (gl) {
-                const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
-                if (debugInfo) {
-                    const graphicsCardName = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-                    graphicsCard = graphicsCardName || "Not available";
-                }
-            }
-            output += `<div class="info-line">Graphics Card Name / Driver: ${graphicsCard}</div>`;
-
-            output += `<div class="info-line">Touchscreen: ${"ontouchstart" in window ? "Yes" : "No"}</div>`;
-
-            output += `<div class="info-line">Languages: ${navigator.languages.join(", ")}</div>`;
-
-            if (navigator.storage && navigator.storage.estimate) {
-                try {
-                    const { quota, usage } = await navigator.storage.estimate();
-                    output += `<div class="info-line">Storage Quota: ${(quota / (1024 * 1024)).toFixed(2)} MB</div>`;
-                    output += `<div class="info-line">Used Storage: ${(usage / (1024 * 1024)).toFixed(2)} MB</div>`;
-                } catch {
-                    output += `<div class="info-line">Storage Details: Not available</div>`;
-                }
-            } else {
-                output += `<div class="info-line">Storage API: Not supported</div>`;
-            }
-
-            output += `<div class="info-line">Browser Outer Size: ${window.outerWidth} x ${window.outerHeight} pixels</div>`;
-            output += `<div class="info-line">Browser Inner Size: ${window.innerWidth} x ${window.innerHeight} pixels</div>`;
-
-            output += `<div class="info-line">Screen Orientation: ${screen.orientation.type}</div>`;
-            output += `<div class="info-line">Screen Resolution: ${screen.width} x ${screen.height} pixels</div>`;
-            output += `<div class="info-line">Aspect Ratio: ${screen.width}:${screen.height}</div>`;
-            output += `<div class="info-line">Device Pixel Ratio: ${window.devicePixelRatio}</div>`;
-            output += `<div class="info-line">Color Depth: ${screen.colorDepth}-bit</div>`;
-
-            output += `<div class="info-line">Do Not Track: ${navigator.doNotTrack === "1" ? "Enabled" : "Disabled"}</div>`;
-
-            output += `<div class="info-line">Cookies: ${checkCookies()}</div>`;
-
-            output += `<div class="info-line">Bluetooth Support: ${detectBluetooth()}</div>`;
-
-            const mediaDevices = await detectMediaDevices();
-            output += `<div class="info-line">Speakers: ${mediaDevices.speakers}</div>`;
-            output += `<div class="info-line">Number of Speakers: ${mediaDevices.speakers === 'Yes' ? 1 : 0}</div>`;
-            output += `<div class="info-line">Microphone: ${mediaDevices.microphones}</div>`;
-            output += `<div class="info-line">Number of Microphones: ${mediaDevices.microphones === 'Yes' ? 1 : 0}</div>`;
-            output += `<div class="info-line">Camera: ${mediaDevices.camera}</div>`;
-            output += `<div class="info-line">Number of Cameras: ${mediaDevices.camera === 'Yes' ? 1 : 0}</div>`;
-
-            const bluetoothAdapter = await detectBluetoothAdapter();
-            output += `<div class="info-line">Bluetooth Adapter Connected: ${bluetoothAdapter}</div>`;
-
-            output += `<div class="info-line">Firefox Extensions Supported: ${navigator.userAgent.includes("Firefox") ? "Yes" : "No"}</div>`;
-
-            output += `<div class="info-line">Memory (RAM): ${navigator.deviceMemory || "Unknown"} GB</div>`;
-
-            output += `<div class="info-line">Number of cores in CPU: ${navigator.hardwareConcurrency || "Unknown"}</div>`;
-
-            try {
-                const clipboardAccess = await navigator.permissions.query({ name: 'clipboard-read' });
-                output += `<div class="info-line">Clipboard Access: ${clipboardAccess.state === "granted" ? "Allowed" : "Disabled"}</div>`;
-            } catch (e) {
-                output += `<div class="info-line">Clipboard Access: Disabled</div>`;
-            }
-
-            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            output += `<div class="info-line">Time Zone: UTC ${timeZone}</div>`;
-
-            infoDiv.innerHTML = output;
+    if (gl) {
+        const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+        if (debugInfo) {
+            const graphicsCardName = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+            graphicsCard = graphicsCardName || "Not available";
         }
+    }
+    output += `<div class="info-line">Graphics Card Name / Driver: ${graphicsCard}</div>`;
+
+    output += `<div class="info-line">Touchscreen: ${"ontouchstart" in window ? "Yes" : "No"}</div>`;
+
+    output += `<div class="info-line">Languages: ${navigator.languages.join(", ")}</div>`;
+
+    if (navigator.storage && navigator.storage.estimate) {
+        try {
+            const { quota, usage } = await navigator.storage.estimate();
+            output += `<div class="info-line">Storage Quota: ${(quota / (1024 * 1024)).toFixed(2)} MB</div>`;
+            output += `<div class="info-line">Used Storage: ${(usage / (1024 * 1024)).toFixed(2)} MB</div>`;
+        } catch {
+            output += `<div class="info-line">Storage Details: Not available</div>`;
+        }
+    } else {
+        output += `<div class="info-line">Storage API: Not supported</div>`;
+    }
+
+    output += `<div class="info-line">Browser Outer Size: ${window.outerWidth} x ${window.outerHeight} pixels</div>`;
+    output += `<div class="info-line">Browser Inner Size: ${window.innerWidth} x ${window.innerHeight} pixels</div>`;
+
+    output += `<div class="info-line">Screen Orientation: ${screen.orientation.type}</div>`;
+    output += `<div class="info-line">Screen Resolution: ${screen.width} x ${screen.height} pixels</div>`;
+    output += `<div class="info-line">Aspect Ratio: ${screen.width}:${screen.height}</div>`;
+    output += `<div class="info-line">Device Pixel Ratio: ${window.devicePixelRatio}</div>`;
+    output += `<div class="info-line">Color Depth: ${screen.colorDepth}-bit</div>`;
+
+    output += `<div class="info-line">Do Not Track: ${navigator.doNotTrack === "1" ? "Enabled" : "Disabled"}</div>`;
+
+    output += `<div class="info-line">Cookies: ${checkCookies()}</div>`;
+
+    output += `<div class="info-line">Bluetooth Support: ${detectBluetooth()}</div>`;
+
+    const mediaDevices = await detectMediaDevices();
+    output += `<div class="info-line">Speakers Detected: ${mediaDevices.speakersCount}</div>`;
+    output += `<div class="info-line">Number of Speakers: ${mediaDevices.speakersCount}</div>`;
+    output += `<div class="info-line">Microphones Detected: ${mediaDevices.microphonesCount}</div>`;
+    output += `<div class="info-line">Number of Microphones: ${mediaDevices.microphonesCount}</div>`;
+    output += `<div class="info-line">Cameras Detected: ${mediaDevices.cameraCount}</div>`;
+    output += `<div class="info-line">Number of Cameras: ${mediaDevices.cameraCount}</div>`;
+
+    const bluetoothAdapter = await detectBluetoothAdapter();
+    output += `<div class="info-line">Bluetooth Adapter Connected: ${bluetoothAdapter}</div>`;
+
+    output += `<div class="info-line">Firefox Extensions Supported: ${navigator.userAgent.includes("Firefox") ? "Yes" : "No"}</div>`;
+
+    output += `<div class="info-line">Memory (RAM): ${navigator.deviceMemory || "Unknown"} GB</div>`;
+
+    output += `<div class="info-line">Number of cores in CPU: ${navigator.hardwareConcurrency || "Unknown"}</div>`;
+
+    try {
+        const clipboardAccess = await navigator.permissions.query({ name: 'clipboard-read' });
+        output += `<div class="info-line">Clipboard Access: ${clipboardAccess.state === "granted" ? "Allowed" : "Disabled"}</div>`;
+    } catch (e) {
+        output += `<div class="info-line">Clipboard Access: Disabled</div>`;
+    }
+
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    output += `<div class="info-line">Time Zone: UTC ${timeZone}</div>`;
+
+    infoDiv.innerHTML = output;
+                                                                }
 
         function checkGoogleAnalyticsPixel() {
             const pixelStatusDiv = document.getElementById("pixelStatus");
