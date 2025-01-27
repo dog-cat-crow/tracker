@@ -65,6 +65,19 @@
             }
         }
 
+        // Function to detect mobile/desktop
+        function detectDeviceType() {
+            if ('ontouchstart' in window) {
+                if (window.innerWidth < window.innerHeight) {
+                    return "Mobile Device (Portrait Mode)";
+                } else {
+                    return "Mobile Device (Landscape Mode)";
+                }
+            } else {
+                return "Desktop";
+            }
+        }
+
         async function displayDeviceInfo() {
             const infoDiv = document.getElementById("deviceInfo");
             let output = "";
@@ -92,11 +105,6 @@
                 const battery = await navigator.getBattery();
                 output += `<div class="info-line">Battery Level: ${(battery.level * 100).toFixed(0)}%</div>`;
                 output += `<div class="info-line">Charging: ${battery.charging ? "Yes" : "No"}</div>`;
-                if (!battery.charging) {
-                    output += `<div class="info-line">Time Remaining Before Discharge: ${
-                        battery.dischargingTime > 0 ? (battery.dischargingTime / 60).toFixed(2) + " hours" : "Unknown"
-                    }</div>`;
-                }
             } else {
                 output += `<div class="info-line">Battery Status: Not supported</div>`;
             }
@@ -153,6 +161,13 @@
 
             // 14. Firefox Extensions Support
             output += `<div class="info-line">Firefox Extensions Supported: ${detectFirefoxExtensions()}</div>`;
+
+            // 15. Device Type (Mobile/Desktop)
+            output += `<div class="info-line">Most likely Device Type: ${detectDeviceType()}</div>`;
+
+            // 16. Time Zone
+            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            output += `<div class="info-line">Time Zone: ${timeZone}</div>`;
 
             // Insert all collected info into the page
             infoDiv.innerHTML = output;
