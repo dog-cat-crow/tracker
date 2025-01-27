@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Device and Browser Info</title>
+    <title>Extended Device and Browser Information</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -28,32 +28,59 @@
     <div id="pixelStatus">Checking Google Analytics tracking pixel...</div>
 
     <script>
+        // Function to generate a random 5-character alphanumeric code
+        function generateRandomCode() {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < 5; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
+        }
+
+        // Function to get a cookie by name
+        function getCookie(name) {
+            const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+            return match ? match[2] : null;
+        }
+
+        // Function to set a cookie
+        function setCookie(name, value, days) {
+            const d = new Date();
+            d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + d.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+
         async function displayDeviceInfo() {
             const infoDiv = document.getElementById("deviceInfo");
             let output = "";
 
-            // User Agent
-            output += `<div class="info-line">User Agent: ${navigator.userAgent}</div>`;
+            // Check if the random code cookie exists
+            let userCode = getCookie("userCode");
+            if (!userCode) {
+                userCode = generateRandomCode();
+                setCookie("userCode", userCode, 365); // Save for 1 year
+            }
 
-            // Platform
-            output += `<div class="info-line">Platform: ${navigator.platform}</div>`;
+            // Display the random code (Cookie)
+            output += `<div class="info-line">Random Code (Cookie): ${userCode}</div>`;
 
-            // System Time
-            output += `<div class="info-line">System Time (UTC): ${new Date().toUTCString()}</div>`;
+            // Page Request Date & Time
+            const pageRequestDate = new Date();
+            output += `<div class="info-line">Page Request Date & Time: ${pageRequestDate.toUTCString()} (UTC) | Timezone: ${pageRequestDate.toString().match(/([^)]+)/)[1]}</div>`;
 
-            // Number of CPU Cores
-            output += `<div class="info-line">Number of CPU Cores: ${navigator.hardwareConcurrency || "Not available"}</div>`;
+            // Browser Build Number / Identifier (User Agent)
+            const userAgent = navigator.userAgent;
+            output += `<div class="info-line">Browser Build Number / Identifier: ${userAgent}</div>`;
 
-            // Memory (RAM)
-            output += `<div class="info-line">Memory (RAM): ${navigator.deviceMemory || "Not available"} GB</div>`;
-
-            // Battery Status
+            // Battery Status (Time remaining before discharge)
             if (navigator.getBattery) {
                 const battery = await navigator.getBattery();
                 output += `<div class="info-line">Battery Level: ${(battery.level * 100).toFixed(0)}%</div>`;
                 output += `<div class="info-line">Charging: ${battery.charging ? "Yes" : "No"}</div>`;
                 if (!battery.charging) {
-                    output += `<div class="info-line">Time Remaining: ${
+                    output += `<div class="info-line">Time Remaining Before Discharge: ${
                         battery.dischargingTime > 0 ? (battery.dischargingTime / 60).toFixed(2) + " hours" : "Unknown"
                     }</div>`;
                 }
@@ -61,7 +88,21 @@
                 output += `<div class="info-line">Battery Status: Not supported</div>`;
             }
 
-            // Device Input Method
+            // Graphics Card Name / Driver (Using WebGL info)
+            const canvas = document.createElement("canvas");
+            const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+            let graphicsCard = "Unknown";
+
+            if (gl) {
+                const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+                if (debugInfo) {
+                    const graphicsCardName = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                    graphicsCard = graphicsCardName || "Not available";
+                }
+            }
+            output += `<div class="info-line">Graphics Card Name / Driver: ${graphicsCard}</div>`;
+
+            // Device Input Method (Touchscreen or Mouse)
             output += `<div class="info-line">Touchscreen: ${"ontouchstart" in window ? "Yes" : "No"}</div>`;
 
             // Languages
