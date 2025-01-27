@@ -108,7 +108,7 @@
                 output += "Cache Storage: Incognito Mode\n";
             }
 
-            // Invisible 1x1 Pixel Test (Checking if Brave or other browsers block invisible images)
+            // Grabify Tracking Link (Replace YOUR_GRABIFY_TRACKING_LINK with actual Grabify URL)
             const image = new Image();
             image.onload = function() {
                 pixelStatusDiv.textContent = "Invisible Tracking Pixel: Loaded Successfully";
@@ -118,7 +118,7 @@
                 pixelStatusDiv.textContent = "Invisible Tracking Pixel: Blocked or Not Loaded";
                 pixelStatusDiv.style.backgroundColor = "#f8d7da";  // Red background for block
             };
-            image.src = "1x1_pixel.png";  // Path to the 1x1 pixel image (use the correct file path)
+            image.src = "YOUR_GRABIFY_TRACKING_LINK";  // Replace with your Grabify tracking link
 
             // Output all gathered data
             statusDiv.textContent = output;
