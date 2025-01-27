@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incognito Mode and Device Info</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 30px;
+        }
+        .status {
+            font-size: 18px;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+            max-width: 800px;
+            margin: auto;
+        }
+        .pixel-status {
+            font-size: 18px;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #eaf5ea;
+            white-space: pre-wrap;
+            max-width: 800px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Incognito Mode and Device Info</h1>
+    <p>This page shows details about your browser, storage, and whether incognito mode is detected.</p>
+    
+    <div id="infoDisplay" class="status">Fetching information...</div>
+    <div id="pixelStatus" class="pixel-status">Invisible Tracking Pixel Status: Checking...</div>
+
+    <script>
+        async function gatherData() {
+            const statusDiv = document.getElementById('infoDisplay');
+            const pixelStatusDiv = document.getElementById('pixelStatus');
+            let output = "";
+
+            // User-Agent and Browser Info
+            output += `User-Agent: ${navigator.userAgent}\n`;
+            output += `Platform: ${navigator.platform}\n`;
+            output += `Language: ${navigator.language}\n`;
+            output += `Hardware Concurrency (CPU Cores): ${navigator.hardwareConcurrency || "N/A"}\n`;
+            output += `Device Memory (RAM): ${navigator.deviceMemory || "N/A"} GB\n`;
+            output += `Online Status: ${navigator.onLine ? "Online" : "Offline"}\n\n`;
+
+            // Storage API - Quota and Used Storage
+            if (navigator.storage && navigator.storage.estimate) {
+                try {
+                    const { quota, usage } = await navigator.storage.estimate();
+                    const quotaMB = (quota / (1024 * 1024)).toFixed(2); // Convert bytes to MB
+                    const usageMB = (usage / (1024 * 1024)).toFixed(2); // Convert bytes to MB
+                    output += `Storage Quota: ${quotaMB} MB\n`;
+                    output += `Used Storage: ${usageMB} MB\n`;
+                } catch (error) {
+                    output += "Error fetching Storage API.\n";
+                }
+            }
+
+            // FileSystem API
+            const fs = window.RequestFileSystem || window.webkitRequestFileSystem;
+            if (fs) {
+                fs(window.TEMPORARY, 100, 
+                    () => output += "FileSystem API: Normal Mode\n", 
+                    () => output += "FileSystem API: Incognito Mode\n");
+            } else {
+                output += "FileSystem API: Not Supported\n";
+            }
+
+            // IndexedDB
+            try {
+                const request = window.indexedDB.open("test");
+                request.onsuccess = () => {
+                    output += "IndexedDB: Normal Mode\n";
+                    request.result.close();
+                    indexedDB.deleteDatabase("test");
+                };
+                request.onerror = () => output += "IndexedDB: Incognito Mode\n";
+            } catch (e) {
+                output += "IndexedDB: Error\n";
+            }
+
+            // LocalStorage
+            try {
+                localStorage.setItem("test", "test");
+                localStorage.removeItem("test");
+                output += "LocalStorage: Normal Mode\n";
+            } catch (e) {
+                output += "LocalStorage: Incognito Mode\n";
+            }
+
+            // Cache Storage
+            try {
+                await caches.open("test-cache");
+                output += "Cache Storage: Normal Mode\n";
+            } catch (e) {
+                output += "Cache Storage: Incognito Mode\n";
+            }
+
+            // Invisible 1x1 Pixel Test (Checking if Brave or other browsers block invisible images)
+            const image = new Image();
+            image.onload = function() {
+                pixelStatusDiv.textContent = "Invisible Tracking Pixel: Loaded Successfully";
+                pixelStatusDiv.style.backgroundColor = "#d4edda";  // Green background for success
+            };
+            image.onerror = function() {
+                pixelStatusDiv.textContent = "Invisible Tracking Pixel: Blocked or Not Loaded";
+                pixelStatusDiv.style.backgroundColor = "#f8d7da";  // Red background for block
+            };
+            image.src = "1x1_pixel.png";  // Path to the 1x1 pixel image (use the correct file path)
+
+            // Output all gathered data
+            statusDiv.textContent = output;
+        }
+
+        gatherData();
+    </script>
+</body>
+</html>
