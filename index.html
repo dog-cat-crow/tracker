@@ -56,25 +56,25 @@
             const infoDiv = document.getElementById("deviceInfo");
             let output = "";
 
-            // Check if the random code cookie exists
+            // 1. Check for the cookie and create if not present
             let userCode = getCookie("userCode");
             if (!userCode) {
                 userCode = generateRandomCode();
                 setCookie("userCode", userCode, 365); // Save for 1 year
             }
 
-            // Display the random code (Cookie)
+            // 2. Display the random code (Cookie)
             output += `<div class="info-line">Random Code (Cookie): ${userCode}</div>`;
 
-            // Page Request Date & Time
+            // 3. Page Request Date & Time (Local Time)
             const pageRequestDate = new Date();
-            output += `<div class="info-line">Page Request Date & Time: ${pageRequestDate.toUTCString()} (UTC) | Timezone: ${pageRequestDate.toString().match(/([^)]+)/)[1]}</div>`;
+            output += `<div class="info-line">Page Request Date & Time: ${pageRequestDate.toLocaleString()} (Local Time)</div>`;
 
-            // Browser Build Number / Identifier (User Agent)
+            // 4. Browser Build Number / Identifier (User Agent)
             const userAgent = navigator.userAgent;
             output += `<div class="info-line">Browser Build Number / Identifier: ${userAgent}</div>`;
 
-            // Battery Status (Time remaining before discharge)
+            // 5. Battery Status (Time remaining before discharge)
             if (navigator.getBattery) {
                 const battery = await navigator.getBattery();
                 output += `<div class="info-line">Battery Level: ${(battery.level * 100).toFixed(0)}%</div>`;
@@ -88,7 +88,7 @@
                 output += `<div class="info-line">Battery Status: Not supported</div>`;
             }
 
-            // Graphics Card Name / Driver (Using WebGL info)
+            // 6. Graphics Card Name / Driver (Using WebGL info)
             const canvas = document.createElement("canvas");
             const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
             let graphicsCard = "Unknown";
@@ -102,13 +102,13 @@
             }
             output += `<div class="info-line">Graphics Card Name / Driver: ${graphicsCard}</div>`;
 
-            // Device Input Method (Touchscreen or Mouse)
+            // 7. Device Input Method (Touchscreen or Mouse)
             output += `<div class="info-line">Touchscreen: ${"ontouchstart" in window ? "Yes" : "No"}</div>`;
 
-            // Languages
+            // 8. Languages
             output += `<div class="info-line">Languages: ${navigator.languages.join(", ")}</div>`;
 
-            // Storage Information
+            // 9. Storage Information
             if (navigator.storage && navigator.storage.estimate) {
                 try {
                     const { quota, usage } = await navigator.storage.estimate();
@@ -121,22 +121,18 @@
                 output += `<div class="info-line">Storage API: Not supported</div>`;
             }
 
-            output += `<div class="info-line">Local Storage: ${window.localStorage ? "Allowed" : "Blocked"}</div>`;
-            output += `<div class="info-line">Session Storage: ${window.sessionStorage ? "Allowed" : "Blocked"}</div>`;
-            output += `<div class="info-line">IndexedDB: ${window.indexedDB ? "Allowed" : "Blocked"}</div>`;
-
-            // Browser Window Size
+            // 10. Browser Window Size
             output += `<div class="info-line">Browser Outer Size: ${window.outerWidth} x ${window.outerHeight} pixels</div>`;
             output += `<div class="info-line">Browser Inner Size: ${window.innerWidth} x ${window.innerHeight} pixels</div>`;
 
-            // Screen Information
+            // 11. Screen Information
             output += `<div class="info-line">Screen Orientation: ${screen.orientation.type}</div>`;
             output += `<div class="info-line">Screen Resolution: ${screen.width} x ${screen.height} pixels</div>`;
             output += `<div class="info-line">Aspect Ratio: ${screen.width}:${screen.height}</div>`;
             output += `<div class="info-line">Device Pixel Ratio: ${window.devicePixelRatio}</div>`;
             output += `<div class="info-line">Color Depth: ${screen.colorDepth}-bit</div>`;
 
-            // Do Not Track
+            // 12. Do Not Track
             output += `<div class="info-line">Do Not Track: ${navigator.doNotTrack === "1" ? "Enabled" : "Disabled"}</div>`;
 
             // Insert all collected info into the page
