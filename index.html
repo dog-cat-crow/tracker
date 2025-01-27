@@ -98,7 +98,7 @@
         function getConnectionType() {
             if (navigator.connection) {
                 const connectionType = navigator.connection.type;
-                return connectionType === 'wifi' ? 'Wifi' : connectionType === 'cellular' ? 'Cellular' : 'Unknown';
+                return connectionType === 'wifi' ? 'WiFi' : connectionType === 'cellular' ? 'Cellular' : 'Unknown';
             }
             return 'Unknown';
         }
