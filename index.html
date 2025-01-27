@@ -55,30 +55,38 @@
             return "bluetooth" in navigator ? 'Yes' : 'No';
         }
 
-        async function detectMediaDevices() {
-            let speakers = 'No';
-            let microphones = 'No';
-            let camera = 'No';
+async function detectMediaDevices() {
+    let speakersCount = 0;
+    let microphonesCount = 0;
+    let cameraCount = 0;
 
-            try {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                devices.forEach(device => {
-                    if (device.kind === 'audiooutput') {
-                        speakers = 'Yes';
-                    }
-                    if (device.kind === 'audioinput') {
-                        microphones = 'Yes';
-                    }
-                    if (device.kind === 'videoinput') {
-                        camera = 'Yes';
-                    }
-                });
-            } catch (e) {
-                console.error('Error detecting media devices:', e);
+    try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        devices.forEach(device => {
+            if (device.kind === 'audiooutput') {
+                speakersCount++;
             }
+            if (device.kind === 'audioinput') {
+                microphonesCount++;
+            }
+            if (device.kind === 'videoinput') {
+                cameraCount++;
+            }
+        });
+    } catch (e) {
+        console.error('Error detecting media devices:', e);
+    }
 
-            return { speakers, microphones, camera };
-        }
+    return { speakersCount, microphonesCount, cameraCount };
+}
+
+const mediaDevices = await detectMediaDevices();
+output += `<div class="info-line">Speakers Detected: ${mediaDevices.speakersCount}</div>`;
+output += `<div class="info-line">Number of Speakers: ${mediaDevices.speakersCount}</div>`;
+output += `<div class="info-line">Microphones Detected: ${mediaDevices.microphonesCount}</div>`;
+output += `<div class="info-line">Number of Microphones: ${mediaDevices.microphonesCount}</div>`;
+output += `<div class="info-line">Cameras Detected: ${mediaDevices.cameraCount}</div>`;
+output += `<div class="info-line">Number of Cameras: ${mediaDevices.cameraCount}</div>`;
 
         async function detectBluetoothAdapter() {
             if (navigator.bluetooth) {
