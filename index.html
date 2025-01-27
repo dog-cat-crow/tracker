@@ -95,6 +95,14 @@
             return 'No';
         }
 
+        function getConnectionType() {
+            if (navigator.connection) {
+                const connectionType = navigator.connection.type;
+                return connectionType === 'wifi' ? 'Wifi' : connectionType === 'cellular' ? 'Cellular' : 'Unknown';
+            }
+            return 'Unknown';
+        }
+
         async function displayDeviceInfo() {
             const infoDiv = document.getElementById("deviceInfo");
             let output = "";  // Initialize output as an empty string.
@@ -198,6 +206,9 @@
 
             const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             output += `<div class="info-line">Time Zone: UTC ${timeZone}</div>`;
+
+            // Add Internet Connection status
+            output += `<div class="info-line">Internet Connection: ${getConnectionType()}</div>`;
 
             infoDiv.innerHTML = output;
         }
