@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Device and Browser Information</title>
+    <title>Device and Browser Info</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
         .info-block {
-            margin: 20px 0;
-            padding: 15px;
+            margin: 10px 0;
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 8px;
             background: #f9f9f9;
             max-width: 800px;
+            line-height: 1.5;
         }
         .pixel-status {
             padding: 10px;
@@ -29,28 +30,19 @@
 </head>
 <body>
     <h1>Device and Browser Information</h1>
-    <div class="info-block" id="deviceInfo">Fetching device information...</div>
-    <div class="pixel-status" id="pixelStatus">Checking Google Analytics tracking pixel...</div>
+    <div class="info-block" id="deviceInfo"></div>
+    <div class="pixel-status" id="pixelStatus"></div>
 
     <script>
-        async function getDeviceInfo() {
+        async function displayDeviceInfo() {
             const infoDiv = document.getElementById("deviceInfo");
             let output = "";
 
-            // User Agent
+            // Line-by-line display
             output += `User Agent: ${navigator.userAgent}\n`;
-
-            // Graphics Card Name / Driver
-            output += `Graphics Card / Driver: Cannot be fetched directly with JavaScript\n`;
-
-            // System (Live) Time
-            const currentDate = new Date();
-            output += `System Time (UTC): ${currentDate.toUTCString()}\n`;
-
-            // Number of Cores
+            output += `Platform: ${navigator.platform}\n`;
+            output += `System Time (UTC): ${new Date().toUTCString()}\n`;
             output += `Number of CPU Cores: ${navigator.hardwareConcurrency || "Not available"}\n`;
-
-            // Memory (RAM)
             output += `Memory (RAM): ${navigator.deviceMemory || "Not available"} GB\n`;
 
             // Battery Status
@@ -65,36 +57,40 @@
                 output += "Battery Status: Not supported\n";
             }
 
-            // Device Pointing Method
-            output += `Device Pointing Method:\n`;
-            output += `Mouse: Cannot detect\n`;
+            // Device Input Method
             output += `Touchscreen: ${'ontouchstart' in window ? "Yes" : "No"}\n`;
 
             // Languages
             output += `Languages: ${navigator.languages.join(", ")}\n`;
 
-            // Storage Information
-            output += `Storage:\n`;
-            try {
-                const { quota, usage } = await navigator.storage.estimate();
-                output += `  Quota: ${(quota / (1024 * 1024)).toFixed(2)} MB\n`;
-                output += `  Usage: ${(usage / (1024 * 1024)).toFixed(2)} MB\n`;
-            } catch {
-                output += "  Storage: Not available\n";
+            // Storage Quota and Usage
+            output += `Storage Information:\n`;
+            if (navigator.storage && navigator.storage.estimate) {
+                try {
+                    const { quota, usage } = await navigator.storage.estimate();
+                    output += `  Total Quota: ${(quota / (1024 * 1024)).toFixed(2)} MB\n`;
+                    output += `  Used Storage: ${(usage / (1024 * 1024)).toFixed(2)} MB\n`;
+                } catch (e) {
+                    output += "  Could not fetch storage details\n";
+                }
+            } else {
+                output += "  Storage API not supported\n";
             }
-            output += `  IndexedDB: ${window.indexedDB ? "Allowed" : "Blocked"}\n`;
+
+            // Local Storage, IndexedDB, and Session Storage
             output += `  Local Storage: ${window.localStorage ? "Allowed" : "Blocked"}\n`;
             output += `  Session Storage: ${window.sessionStorage ? "Allowed" : "Blocked"}\n`;
+            output += `  IndexedDB: ${window.indexedDB ? "Allowed" : "Blocked"}\n`;
 
             // Browser Window Size
             output += `Browser Window Size:\n`;
-            output += `  Outer: ${window.outerWidth} x ${window.outerHeight} (pixels)\n`;
-            output += `  Inner: ${window.innerWidth} x ${window.innerHeight} (pixels)\n`;
+            output += `  Outer: ${window.outerWidth} x ${window.outerHeight} pixels\n`;
+            output += `  Inner: ${window.innerWidth} x ${window.innerHeight} pixels\n`;
 
-            // Screen Information
-            output += `Screen:\n`;
+            // Screen Info
+            output += `Screen Information:\n`;
             output += `  Orientation: ${screen.orientation.type}\n`;
-            output += `  Resolution: ${screen.width} x ${screen.height} (pixels)\n`;
+            output += `  Resolution: ${screen.width} x ${screen.height} pixels\n`;
             output += `  Aspect Ratio: ${screen.width}:${screen.height}\n`;
             output += `  Device Pixel Ratio: ${window.devicePixelRatio}\n`;
             output += `  Color Depth: ${screen.colorDepth}-bit\n`;
@@ -102,30 +98,26 @@
             // Do Not Track
             output += `Do Not Track: ${navigator.doNotTrack === "1" ? "Enabled" : "Disabled"}\n`;
 
-            // Display collected info
             infoDiv.textContent = output;
         }
 
-        // Google Analytics Tracking Pixel
-        function checkPixel() {
+        function checkGoogleAnalyticsPixel() {
             const pixelStatusDiv = document.getElementById("pixelStatus");
-            const image = new Image();
-            image.onload = function() {
+            const img = new Image();
+            img.onload = () => {
                 pixelStatusDiv.textContent = "Google Analytics Pixel: Loaded Successfully";
-                pixelStatusDiv.style.backgroundColor = "#d4edda"; // Green for success
+                pixelStatusDiv.style.backgroundColor = "#d4edda"; // Green background for success
             };
-            image.onerror = function() {
-                pixelStatusDiv.textContent = "Google Analytics Pixel: Blocked";
-                pixelStatusDiv.style.backgroundColor = "#f8d7da"; // Red for blocked
+            img.onerror = () => {
+                pixelStatusDiv.textContent = "Google Analytics Pixel: Blocked or Not Loaded";
+                pixelStatusDiv.style.backgroundColor = "#f8d7da"; // Red background for failure
             };
-
-            // Using Google Analytics tracking pixel URL
-            image.src = "https://www.google-analytics.com/collect?v=1&t=event&tid=UA-000000-2&cid=555&ec=category&ea=action&el=label&ev=1";
+            img.src = "https://www.google-analytics.com/collect?v=1&t=event&tid=UA-000000-2&cid=555&ec=category&ea=action&el=label&ev=1";
         }
 
-        // Run both functions
-        getDeviceInfo();
-        checkPixel();
+        // Execute both functions
+        displayDeviceInfo();
+        checkGoogleAnalyticsPixel();
     </script>
 </body>
 </html>
