@@ -8,97 +8,98 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            line-height: 1.8;
         }
-        .info-block {
-            margin: 10px 0;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background: #f9f9f9;
-            max-width: 800px;
-            line-height: 1.5;
+        .info-line {
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
         }
-        .pixel-status {
+        #pixelStatus {
             padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background: #eaf5ea;
-            margin-top: 10px;
-            color: #333;
+            margin-top: 20px;
+            border-radius: 5px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <h1>Device and Browser Information</h1>
-    <div class="info-block" id="deviceInfo"></div>
-    <div class="pixel-status" id="pixelStatus"></div>
+    <div id="deviceInfo"></div>
+    <div id="pixelStatus">Checking Google Analytics tracking pixel...</div>
 
     <script>
         async function displayDeviceInfo() {
             const infoDiv = document.getElementById("deviceInfo");
             let output = "";
 
-            // Line-by-line display
-            output += `User Agent: ${navigator.userAgent}\n`;
-            output += `Platform: ${navigator.platform}\n`;
-            output += `System Time (UTC): ${new Date().toUTCString()}\n`;
-            output += `Number of CPU Cores: ${navigator.hardwareConcurrency || "Not available"}\n`;
-            output += `Memory (RAM): ${navigator.deviceMemory || "Not available"} GB\n`;
+            // User Agent
+            output += `<div class="info-line">User Agent: ${navigator.userAgent}</div>`;
+
+            // Platform
+            output += `<div class="info-line">Platform: ${navigator.platform}</div>`;
+
+            // System Time
+            output += `<div class="info-line">System Time (UTC): ${new Date().toUTCString()}</div>`;
+
+            // Number of CPU Cores
+            output += `<div class="info-line">Number of CPU Cores: ${navigator.hardwareConcurrency || "Not available"}</div>`;
+
+            // Memory (RAM)
+            output += `<div class="info-line">Memory (RAM): ${navigator.deviceMemory || "Not available"} GB</div>`;
 
             // Battery Status
             if (navigator.getBattery) {
                 const battery = await navigator.getBattery();
-                output += `Battery Level: ${(battery.level * 100).toFixed(0)}%\n`;
-                output += `Charging: ${battery.charging ? "Yes" : "No"}\n`;
+                output += `<div class="info-line">Battery Level: ${(battery.level * 100).toFixed(0)}%</div>`;
+                output += `<div class="info-line">Charging: ${battery.charging ? "Yes" : "No"}</div>`;
                 if (!battery.charging) {
-                    output += `Time Remaining: ${battery.dischargingTime > 0 ? (battery.dischargingTime / 60).toFixed(2) + " hours" : "Unknown"}\n`;
+                    output += `<div class="info-line">Time Remaining: ${
+                        battery.dischargingTime > 0 ? (battery.dischargingTime / 60).toFixed(2) + " hours" : "Unknown"
+                    }</div>`;
                 }
             } else {
-                output += "Battery Status: Not supported\n";
+                output += `<div class="info-line">Battery Status: Not supported</div>`;
             }
 
             // Device Input Method
-            output += `Touchscreen: ${'ontouchstart' in window ? "Yes" : "No"}\n`;
+            output += `<div class="info-line">Touchscreen: ${"ontouchstart" in window ? "Yes" : "No"}</div>`;
 
             // Languages
-            output += `Languages: ${navigator.languages.join(", ")}\n`;
+            output += `<div class="info-line">Languages: ${navigator.languages.join(", ")}</div>`;
 
-            // Storage Quota and Usage
-            output += `Storage Information:\n`;
+            // Storage Information
             if (navigator.storage && navigator.storage.estimate) {
                 try {
                     const { quota, usage } = await navigator.storage.estimate();
-                    output += `  Total Quota: ${(quota / (1024 * 1024)).toFixed(2)} MB\n`;
-                    output += `  Used Storage: ${(usage / (1024 * 1024)).toFixed(2)} MB\n`;
-                } catch (e) {
-                    output += "  Could not fetch storage details\n";
+                    output += `<div class="info-line">Storage Quota: ${(quota / (1024 * 1024)).toFixed(2)} MB</div>`;
+                    output += `<div class="info-line">Used Storage: ${(usage / (1024 * 1024)).toFixed(2)} MB</div>`;
+                } catch {
+                    output += `<div class="info-line">Storage Details: Not available</div>`;
                 }
             } else {
-                output += "  Storage API not supported\n";
+                output += `<div class="info-line">Storage API: Not supported</div>`;
             }
 
-            // Local Storage, IndexedDB, and Session Storage
-            output += `  Local Storage: ${window.localStorage ? "Allowed" : "Blocked"}\n`;
-            output += `  Session Storage: ${window.sessionStorage ? "Allowed" : "Blocked"}\n`;
-            output += `  IndexedDB: ${window.indexedDB ? "Allowed" : "Blocked"}\n`;
+            output += `<div class="info-line">Local Storage: ${window.localStorage ? "Allowed" : "Blocked"}</div>`;
+            output += `<div class="info-line">Session Storage: ${window.sessionStorage ? "Allowed" : "Blocked"}</div>`;
+            output += `<div class="info-line">IndexedDB: ${window.indexedDB ? "Allowed" : "Blocked"}</div>`;
 
             // Browser Window Size
-            output += `Browser Window Size:\n`;
-            output += `  Outer: ${window.outerWidth} x ${window.outerHeight} pixels\n`;
-            output += `  Inner: ${window.innerWidth} x ${window.innerHeight} pixels\n`;
+            output += `<div class="info-line">Browser Outer Size: ${window.outerWidth} x ${window.outerHeight} pixels</div>`;
+            output += `<div class="info-line">Browser Inner Size: ${window.innerWidth} x ${window.innerHeight} pixels</div>`;
 
-            // Screen Info
-            output += `Screen Information:\n`;
-            output += `  Orientation: ${screen.orientation.type}\n`;
-            output += `  Resolution: ${screen.width} x ${screen.height} pixels\n`;
-            output += `  Aspect Ratio: ${screen.width}:${screen.height}\n`;
-            output += `  Device Pixel Ratio: ${window.devicePixelRatio}\n`;
-            output += `  Color Depth: ${screen.colorDepth}-bit\n`;
+            // Screen Information
+            output += `<div class="info-line">Screen Orientation: ${screen.orientation.type}</div>`;
+            output += `<div class="info-line">Screen Resolution: ${screen.width} x ${screen.height} pixels</div>`;
+            output += `<div class="info-line">Aspect Ratio: ${screen.width}:${screen.height}</div>`;
+            output += `<div class="info-line">Device Pixel Ratio: ${window.devicePixelRatio}</div>`;
+            output += `<div class="info-line">Color Depth: ${screen.colorDepth}-bit</div>`;
 
             // Do Not Track
-            output += `Do Not Track: ${navigator.doNotTrack === "1" ? "Enabled" : "Disabled"}\n`;
+            output += `<div class="info-line">Do Not Track: ${navigator.doNotTrack === "1" ? "Enabled" : "Disabled"}</div>`;
 
-            infoDiv.textContent = output;
+            // Insert all collected info into the page
+            infoDiv.innerHTML = output;
         }
 
         function checkGoogleAnalyticsPixel() {
