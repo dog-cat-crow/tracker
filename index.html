@@ -28,207 +28,192 @@
     <div id="pixelStatus">Checking Google Analytics tracking pixel...</div>
 
     <script>
-        function generateRandomCode() {
-            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let result = '';
-            for (let i = 0; i < 5; i++) {
-                result += characters.charAt(Math.floor(Math.random() * characters.length));
+    function generateRandomCode() {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < 5; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return result;
+    }
+
+    function getStoredItem(name) {
+        return localStorage.getItem(name);
+    }
+
+    function setStoredItem(name, value) {
+        localStorage.setItem(name, value);
+    }
+
+    function checkCookies() {
+        document.cookie = "testcookie=true; path=/";
+        const cookiesEnabled = document.cookie.indexOf("testcookie=true") !== -1;
+        return cookiesEnabled ? 'Allowed' : 'Blocked';
+    }
+
+    function detectBluetooth() {
+        return "bluetooth" in navigator ? 'Yes' : 'No';
+    }
+
+    async function detectMediaDevices() {
+        let speakersCount = 0;
+        let microphonesCount = 0;
+        let cameraCount = 0;
+
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            devices.forEach(device => {
+                if (device.kind === 'audiooutput') {
+                    speakersCount++;
+                }
+                if (device.kind === 'audioinput') {
+                    microphonesCount++;
+                }
+                if (device.kind === 'videoinput') {
+                    cameraCount++;
+                }
+            });
+        } catch (e) {
+            console.error('Error detecting media devices:', e);
+        }
+
+        return { speakersCount, microphonesCount, cameraCount };
+    }
+
+    function getConnectionType() {
+        if (navigator.connection) {
+            const connectionType = navigator.connection.type;
+            return connectionType === 'wifi' ? 'WiFi' : connectionType === 'cellular' ? 'Cellular' : 'Unknown';
+        }
+        return 'Unknown';
+    }
+
+    function detectMouse() {
+        return window.matchMedia("(pointer: coarse)").matches ? "No" : "Yes";
+    }
+
+    async function displayDeviceInfo() {
+        const infoDiv = document.getElementById("deviceInfo");
+        let output = "";  // Initialize output as an empty string.
+
+        // Generate or retrieve stored user code
+        let userCode = getStoredItem("userCode");
+        if (!userCode) {
+            userCode = generateRandomCode();
+            setStoredItem("userCode", userCode);
+        }
+
+        output += `<div class="info-line">Random Code (Stored): ${userCode}</div>`;
+
+        // Update and get number of times opened
+        let timesOpened = parseInt(getStoredItem("timesOpened") || "0");
+        timesOpened++;
+        setStoredItem("timesOpened", timesOpened);
+        output += `<div class="info-line">Number of Times Opened: ${timesOpened}</div>`;
+
+        const pageRequestDate = new Date();
+        output += `<div class="info-line">Page Request Date & Time: ${pageRequestDate.toLocaleString()} (Local Time)</div>`;
+
+        const userAgent = navigator.userAgent;
+        output += `<div class="info-line">User Agent: ${userAgent}</div>`;
+
+        if (navigator.getBattery) {
+            const battery = await navigator.getBattery();
+            output += `<div class="info-line">Battery Level: ${(battery.level * 100).toFixed(0)}%</div>`;
+            output += `<div class="info-line">Charging: ${battery.charging ? "Yes" : "No"}</div>`;
+        } else {
+            output += `<div class="info-line">Battery Status: Not supported</div>`;
+        }
+
+        const canvas = document.createElement("canvas");
+        const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        let graphicsCard = "Unknown";
+
+        if (gl) {
+            const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+            if (debugInfo) {
+                const graphicsCardName = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                graphicsCard = graphicsCardName || "Not available";
             }
-            return result;
         }
+        output += `<div class="info-line">Graphics Card Name / Driver: ${graphicsCard}</div>`;
 
-        function getStoredItem(name) {
-            return localStorage.getItem(name);
-        }
+        output += `<div class="info-line">Touchscreen: ${"ontouchstart" in window ? "Yes" : "No"}</div>`;
 
-        function setStoredItem(name, value) {
-            localStorage.setItem(name, value);
-        }
+        output += `<div class="info-line">Languages: ${navigator.languages.join(", ")}</div>`;
 
-        function checkCookies() {
-            document.cookie = "testcookie=true; path=/";
-            const cookiesEnabled = document.cookie.indexOf("testcookie=true") !== -1;
-            return cookiesEnabled ? 'Allowed' : 'Blocked';
-        }
-
-        function detectBluetooth() {
-            return "bluetooth" in navigator ? 'Yes' : 'No';
-        }
-
-        async function detectMediaDevices() {
-            let speakersCount = 0;
-            let microphonesCount = 0;
-            let cameraCount = 0;
-
+        if (navigator.storage && navigator.storage.estimate) {
             try {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                devices.forEach(device => {
-                    if (device.kind === 'audiooutput') {
-                        speakersCount++;
-                    }
-                    if (device.kind === 'audioinput') {
-                        microphonesCount++;
-                    }
-                    if (device.kind === 'videoinput') {
-                        cameraCount++;
-                    }
-                });
-            } catch (e) {
-                console.error('Error detecting media devices:', e);
+                const { quota, usage } = await navigator.storage.estimate();
+                output += `<div class="info-line">Storage Quota: ${(quota / (1024 * 1024)).toFixed(2)} MB</div>`;
+                output += `<div class="info-line">Used Storage: ${(usage / (1024 * 1024)).toFixed(2)} MB</div>`;
+            } catch {
+                output += `<div class="info-line">Storage Details: Not available</div>`;
             }
-
-            return { speakersCount, microphonesCount, cameraCount };
+        } else {
+            output += `<div class="info-line">Storage API: Not supported</div>`;
         }
 
-        async function detectBluetoothAdapter() {
-            if (navigator.bluetooth) {
-                try {
-                    const device = await navigator.bluetooth.requestDevice({
-                        acceptAllDevices: true,
-                        optionalServices: ['battery_service']
-                    });
-                    return 'Yes';
-                } catch (e) {
-                    return 'No';
-                }
-            }
-            return 'No';
+        output += `<div class="info-line">Browser Outer Size: ${window.outerWidth} x ${window.outerHeight} pixels</div>`;
+        output += `<div class="info-line">Browser Inner Size: ${window.innerWidth} x ${window.innerHeight} pixels</div>`;
+
+        output += `<div class="info-line">Screen Orientation: ${screen.orientation.type}</div>`;
+        output += `<div class="info-line">Screen Resolution: ${screen.width} x ${screen.height} pixels</div>`;
+        output += `<div class="info-line">Aspect Ratio: ${screen.width}:${screen.height}</div>`;
+        output += `<div class="info-line">Device Pixel Ratio: ${window.devicePixelRatio}</div>`;
+        output += `<div class="info-line">Color Depth: ${screen.colorDepth}-bit</div>`;
+
+        output += `<div class="info-line">Do Not Track: ${navigator.doNotTrack === "1" ? "Enabled" : "Disabled"}</div>`;
+
+        output += `<div class="info-line">Cookies: ${checkCookies()}</div>`;
+
+        output += `<div class="info-line">Bluetooth Support: ${detectBluetooth()}</div>`;
+
+        const mediaDevices = await detectMediaDevices();
+        output += `<div class="info-line">Speakers Detected: ${mediaDevices.speakersCount}</div>`;
+        output += `<div class="info-line">Microphones Detected: ${mediaDevices.microphonesCount}</div>`;
+        output += `<div class="info-line">Cameras Detected: ${mediaDevices.cameraCount}</div>`;
+
+        output += `<div class="info-line">Firefox Extensions Supported: ${navigator.userAgent.includes("Firefox") ? "Yes" : "No"}</div>`;
+
+        output += `<div class="info-line">Memory (RAM): ${navigator.deviceMemory || "Unknown"} GB</div>`;
+
+        output += `<div class="info-line">Number of cores in CPU: ${navigator.hardwareConcurrency || "Unknown"}</div>`;
+
+        try {
+            const clipboardAccess = await navigator.permissions.query({ name: 'clipboard-read' });
+            output += `<div class="info-line">Clipboard Access: ${clipboardAccess.state === "granted" ? "Allowed" : "Disabled"}</div>`;
+        } catch (e) {
+            output += `<div class="info-line">Clipboard Access: Disabled</div>`;
         }
 
-        function getConnectionType() {
-            if (navigator.connection) {
-                const connectionType = navigator.connection.type;
-                return connectionType === 'wifi' ? 'WiFi' : connectionType === 'cellular' ? 'Cellular' : 'Unknown';
-            }
-            return 'Unknown';
-        }
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        output += `<div class="info-line">Time Zone: UTC ${timeZone}</div>`;
 
-        async function displayDeviceInfo() {
-            const infoDiv = document.getElementById("deviceInfo");
-            let output = "";  // Initialize output as an empty string.
+        // Add Internet Connection status
+        output += `<div class="info-line">Internet Connection: ${getConnectionType()}</div>`;
 
-            // Generate or retrieve stored user code
-            let userCode = getStoredItem("userCode");
-            if (!userCode) {
-                userCode = generateRandomCode();
-                setStoredItem("userCode", userCode);
-            }
+        output += `<div class="info-line">Mouse detected: ${detectMouse()}</div>`;
 
-            output += `<div class="info-line">Random Code (Stored): ${userCode}</div>`;
+        infoDiv.innerHTML = output;
+    }
 
-            // Update and get number of times opened
-            let timesOpened = parseInt(getStoredItem("timesOpened") || "0");
-            timesOpened++;
-            setStoredItem("timesOpened", timesOpened);
-            output += `<div class="info-line">Number of Times Opened: ${timesOpened}</div>`;
+    function checkGoogleAnalyticsPixel() {
+        const pixelStatusDiv = document.getElementById("pixelStatus");
+        const img = new Image();
+        img.onload = () => {
+            pixelStatusDiv.textContent = "Google Analytics Pixel: Loaded Successfully";
+            pixelStatusDiv.style.backgroundColor = "#d4edda";
+        };
+        img.onerror = () => {
+            pixelStatusDiv.textContent = "Google Analytics Pixel: Blocked or Not Loaded";
+            pixelStatusDiv.style.backgroundColor = "#f8d7da";
+        };
+        img.src = "https://www.google-analytics.com/collect?v=1&t=event&tid=UA-000000-2&cid=555&ec=category&ea=action&el=label&ev=1";
+    }
 
-            const pageRequestDate = new Date();
-            output += `<div class="info-line">Page Request Date & Time: ${pageRequestDate.toLocaleString()} (Local Time)</div>`;
-
-            const userAgent = navigator.userAgent;
-            output += `<div class="info-line">User Agent: ${userAgent}</div>`;
-
-            if (navigator.getBattery) {
-                const battery = await navigator.getBattery();
-                output += `<div class="info-line">Battery Level: ${(battery.level * 100).toFixed(0)}%</div>`;
-                output += `<div class="info-line">Charging: ${battery.charging ? "Yes" : "No"}</div>`;
-            } else {
-                output += `<div class="info-line">Battery Status: Not supported</div>`;
-            }
-
-            const canvas = document.createElement("canvas");
-            const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-            let graphicsCard = "Unknown";
-
-            if (gl) {
-                const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
-                if (debugInfo) {
-                    const graphicsCardName = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-                    graphicsCard = graphicsCardName || "Not available";
-                }
-            }
-            output += `<div class="info-line">Graphics Card Name / Driver: ${graphicsCard}</div>`;
-
-            output += `<div class="info-line">Touchscreen: ${"ontouchstart" in window ? "Yes" : "No"}</div>`;
-
-            output += `<div class="info-line">Languages: ${navigator.languages.join(", ")}</div>`;
-
-            if (navigator.storage && navigator.storage.estimate) {
-                try {
-                    const { quota, usage } = await navigator.storage.estimate();
-                    output += `<div class="info-line">Storage Quota: ${(quota / (1024 * 1024)).toFixed(2)} MB</div>`;
-                    output += `<div class="info-line">Used Storage: ${(usage / (1024 * 1024)).toFixed(2)} MB</div>`;
-                } catch {
-                    output += `<div class="info-line">Storage Details: Not available</div>`;
-                }
-            } else {
-                output += `<div class="info-line">Storage API: Not supported</div>`;
-            }
-
-            output += `<div class="info-line">Browser Outer Size: ${window.outerWidth} x ${window.outerHeight} pixels</div>`;
-            output += `<div class="info-line">Browser Inner Size: ${window.innerWidth} x ${window.innerHeight} pixels</div>`;
-
-            output += `<div class="info-line">Screen Orientation: ${screen.orientation.type}</div>`;
-            output += `<div class="info-line">Screen Resolution: ${screen.width} x ${screen.height} pixels</div>`;
-            output += `<div class="info-line">Aspect Ratio: ${screen.width}:${screen.height}</div>`;
-            output += `<div class="info-line">Device Pixel Ratio: ${window.devicePixelRatio}</div>`;
-            output += `<div class="info-line">Color Depth: ${screen.colorDepth}-bit</div>`;
-
-            output += `<div class="info-line">Do Not Track: ${navigator.doNotTrack === "1" ? "Enabled" : "Disabled"}</div>`;
-
-            output += `<div class="info-line">Cookies: ${checkCookies()}</div>`;
-
-            output += `<div class="info-line">Bluetooth Support: ${detectBluetooth()}</div>`;
-
-            const mediaDevices = await detectMediaDevices();
-            output += `<div class="info-line">Speakers Detected: ${mediaDevices.speakersCount}</div>`;
-            output += `<div class="info-line">Number of Speakers: ${mediaDevices.speakersCount}</div>`;
-            output += `<div class="info-line">Microphones Detected: ${mediaDevices.microphonesCount}</div>`;
-            output += `<div class="info-line">Number of Microphones: ${mediaDevices.microphonesCount}</div>`;
-            output += `<div class="info-line">Cameras Detected: ${mediaDevices.cameraCount}</div>`;
-            output += `<div class="info-line">Number of Cameras: ${mediaDevices.cameraCount}</div>`;
-
-            const bluetoothAdapter = await detectBluetoothAdapter();
-            output += `<div class="info-line">Bluetooth Adapter Connected: ${bluetoothAdapter}</div>`;
-
-            output += `<div class="info-line">Firefox Extensions Supported: ${navigator.userAgent.includes("Firefox") ? "Yes" : "No"}</div>`;
-
-            output += `<div class="info-line">Memory (RAM): ${navigator.deviceMemory || "Unknown"} GB</div>`;
-
-            output += `<div class="info-line">Number of cores in CPU: ${navigator.hardwareConcurrency || "Unknown"}</div>`;
-
-            try {
-                const clipboardAccess = await navigator.permissions.query({ name: 'clipboard-read' });
-                output += `<div class="info-line">Clipboard Access: ${clipboardAccess.state === "granted" ? "Allowed" : "Disabled"}</div>`;
-            } catch (e) {
-                output += `<div class="info-line">Clipboard Access: Disabled</div>`;
-            }
-
-            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            output += `<div class="info-line">Time Zone: UTC ${timeZone}</div>`;
-
-            // Add Internet Connection status
-            output += `<div class="info-line">Internet Connection: ${getConnectionType()}</div>`;
-
-            infoDiv.innerHTML = output;
-        }
-
-        function checkGoogleAnalyticsPixel() {
-            const pixelStatusDiv = document.getElementById("pixelStatus");
-            const img = new Image();
-            img.onload = () => {
-                pixelStatusDiv.textContent = "Google Analytics Pixel: Loaded Successfully";
-                pixelStatusDiv.style.backgroundColor = "#d4edda";
-            };
-            img.onerror = () => {
-                pixelStatusDiv.textContent = "Google Analytics Pixel: Blocked or Not Loaded";
-                pixelStatusDiv.style.backgroundColor = "#f8d7da";
-            };
-            img.src = "https://www.google-analytics.com/collect?v=1&t=event&tid=UA-000000-2&cid=555&ec=category&ea=action&el=label&ev=1";
-        }
-
-        displayDeviceInfo();
-        checkGoogleAnalyticsPixel();
-    </script>
+    displayDeviceInfo();
+    checkGoogleAnalyticsPixel();
+</script>
 </body>
 </html>
