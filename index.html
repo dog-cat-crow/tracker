@@ -95,49 +95,34 @@
         const response = await fetch('https://ipinfo.io/?token=46123289608cfd');
         const fullData = await response.json(); // Received full data
 
-        // Map full data to a more readable format without quotes or URL encoding
-        const modifiedData = `
-ip:
-${fullData.ip}
-hostname:
-${fullData.hostname || 'Not available'}
-city:
-${fullData.city}
-region:
-${fullData.region}
-country:
-${fullData.country}
-loc:
-${fullData.loc}
-postal:
-${fullData.postal}
-timezone:
-${fullData.timezone}
+        // Format the data in the desired structure
+        const formattedData = `
+IP Information:
 
-company:
-    name:
-${fullData.company?.name || 'Not available'}
-    domain:
-${fullData.company?.domain || 'Not available'}
-    type:
-${fullData.company?.type || 'Not available'}
+IP: ${fullData.ip}
+Hostname: ${fullData.hostname || 'Not available'}
+City: ${fullData.city}
+Region: ${fullData.region}
+Country: ${fullData.country}
+Location: ${fullData.loc}
+Postal Code: ${fullData.postal}
+Time Zone: ${fullData.timezone}
 
-privacy:
-    vpn:
-${fullData.privacy?.vpn ? 'Yes' : 'No'}
-    proxy:
-${fullData.privacy?.proxy ? 'Yes' : 'No'}
-    tor:
-${fullData.privacy?.tor ? 'Yes' : 'No'}
-    relay:
-${fullData.privacy?.relay ? 'Yes' : 'No'}
-    hosting:
-${fullData.privacy?.hosting ? 'Yes' : 'No'}
-    service:
-${fullData.privacy?.service || 'Not available'}
+IP Provider_
+Name: ${fullData.company?.name || 'Not available'}
+Domain: ${fullData.company?.domain || 'Not available'}
+Type: ${fullData.company?.type || 'Not available'}
+
+PRIVACY_
+VPN: ${fullData.privacy?.vpn ? 'Yes' : 'No'}
+Proxy: ${fullData.privacy?.proxy ? 'Yes' : 'No'}
+Tor: ${fullData.privacy?.tor ? 'Yes' : 'No'}
+Relay: ${fullData.privacy?.relay ? 'Yes' : 'No'}
+Hosting: ${fullData.privacy?.hosting ? 'Yes' : 'No'}
+Service: ${fullData.privacy?.service || 'Not available'}
         `;
 
-        return modifiedData;  // Return the plain text without quotes or URL encoding
+        return formattedData;  // Return the formatted data
     } catch (error) {
         console.error("Error fetching IP info:", error);
         return null;
