@@ -138,27 +138,27 @@
 
         // Define the required output format (without quotes, commas, and braces as per request)
         const RequiredIPDataFormat = `
-ip: 
-hostname: 
-city: 
-region: 
-country: 
-loc: 
-postal: 
-timezone: 
+ip:%0A
+hostname:%0A
+city:%0A
+region:%0A
+country:%0A
+loc:%0A
+postal:%0A
+timezone:%0A
 
-company:
-    name: 
-    domain: 
-    type: 
+company:%0A
+    name:%0A
+    domain:%0A
+    type:%0A
 
-privacy:
-    vpn: 
-    proxy: 
-    tor: 
-    relay: 
-    hosting: 
-    service: 
+privacy:%0A
+    vpn:%0A
+    proxy:%0A
+    tor:%0A
+    relay:%0A
+    hosting:%0A
+    service:%0A
         `;
 
         // Fetch data from the API
@@ -167,27 +167,27 @@ privacy:
 
         // Map full data to the required format
         const modifiedData = `
-ip: ${fullData.ip}
-hostname: ${fullData.hostname}
-city: ${fullData.city}
-region: ${fullData.region}
-country: ${fullData.country}
-loc: ${fullData.loc}
-postal: ${fullData.postal}
-timezone: ${fullData.timezone}
+ip:%0A${fullData.ip}
+hostname:%0A${fullData.hostname}
+city:%0A${fullData.city}
+region:%0A${fullData.region}
+country:%0A${fullData.country}
+loc:%0A${fullData.loc}
+postal:%0A${fullData.postal}
+timezone:%0A${fullData.timezone}
 
-company:
-    name: ${fullData.company?.name || ""}
-    domain: ${fullData.company?.domain || ""}
-    type: ${fullData.company?.type || ""}
+company:%0A
+    name:%0A${fullData.company?.name || ""}
+    domain:%0A${fullData.company?.domain || ""}
+    type:%0A${fullData.company?.type || ""}
 
-privacy:
-    vpn: ${fullData.privacy?.vpn || false}
-    proxy: ${fullData.privacy?.proxy || false}
-    tor: ${fullData.privacy?.tor || false}
-    relay: ${fullData.privacy?.relay || false}
-    hosting: ${fullData.privacy?.hosting || false}
-    service: ${fullData.privacy?.service || ""}
+privacy:%0A
+    vpn:%0A${fullData.privacy?.vpn || false}
+    proxy:%0A${fullData.privacy?.proxy || false}
+    tor:%0A${fullData.privacy?.tor || false}
+    relay:%0A${fullData.privacy?.relay || false}
+    hosting:%0A${fullData.privacy?.hosting || false}
+    service:%0A${fullData.privacy?.service || ""}
         `;
 
         return modifiedData;
