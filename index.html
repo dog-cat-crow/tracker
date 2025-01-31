@@ -257,11 +257,11 @@ ${fullData.privacy?.service || 'Not available'}
         output += `G Analytics Tracker Loaded: ${pixelStatus}\n\n`;
 
         const ipInfo = await fetchIPInfo();
-        if (ipInfo) {
-            output += `IP Information: ${JSON.stringify(ipInfo)}\n\n`;
-        } else {
-            output += `IP Information: Unable to fetch\n\n`;
-        }
+if (ipInfo) {
+    output += `IP Information: ${ipInfo}\n\n`;  // Fixed: directly append the string without JSON.stringify
+} else {
+    output += `IP Information: Unable to fetch\n\n`;
+}
 
         await sendMessageToURL(output);
 
