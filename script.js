@@ -1,6 +1,4 @@
-
-<script>
-    function generateRandomCode() {
+function generateRandomCode() {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         let result = '';
         for (let i = 0; i < 5; i++) {
@@ -246,4 +244,3 @@ if (ipInfo) {
 }
 
     displayDeviceInfo();
-</script>
