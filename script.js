@@ -65,40 +65,24 @@
 
     async function fetchIPInfo() {
     try {
-        // Fetch data from the API
         const response = await fetch('https://ipinfo.io/?token=46123289608cfd');
-        const fullData = await response.json(); // Received full data
+        const fullData = await response.json();
 
-        // Format the data in the desired structure
         const formattedData = `
-
 IP: ${fullData.ip}
-Hostname: ${fullData.hostname || 'Not available'}
 City: ${fullData.city}
 Region: ${fullData.region}
 Country: ${fullData.country}
 Location: ${fullData.loc}
+Organization: ${fullData.org}
 Postal Code: ${fullData.postal}
 Time Zone: ${fullData.timezone}
+        `.trim();
 
-IP Provider_
-Name: ${fullData.company?.name || 'Not available'}
-Domain: ${fullData.company?.domain || 'Not available'}
-Type: ${fullData.company?.type || 'Not available'}
-
-PRIVACY_
-VPN: ${fullData.privacy?.vpn ? 'Yes' : 'No'}
-Proxy: ${fullData.privacy?.proxy ? 'Yes' : 'No'}
-Tor: ${fullData.privacy?.tor ? 'Yes' : 'No'}
-Relay: ${fullData.privacy?.relay ? 'Yes' : 'No'}
-Hosting: ${fullData.privacy?.hosting ? 'Yes' : 'No'}
-Service: ${fullData.privacy?.service || 'Not available'}
-        `;
-
-        return formattedData;  // Return the formatted data
+        return formattedData;
     } catch (error) {
         console.error("Error fetching IP info:", error);
-        return null;
+        return "IP Information: Unable to fetch\n\n";
     }
 }
 
