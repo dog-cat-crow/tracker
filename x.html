@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Android Version Detector</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        h1 { color: #4CAF50; }
+        #android-version { font-size: 20px; font-weight: bold; color: #333; }
+    </style>
+</head>
+<body>
+
+    <h1>Android Version Detector</h1>
+    <p>Your Android Version: <span id="android-version">Detecting...</span></p>
+
+    <script>
+        function detectAndroidVersion() {
+            const versionElement = document.getElementById("android-version");
+
+            // Modern Method: User-Agent Client Hints (Chrome 89+)
+            if (navigator.userAgentData) {
+                navigator.userAgentData.getHighEntropyValues(["platform", "platformVersion"])
+                    .then(ua => {
+                        if (ua.platform === "Android") {
+                            versionElement.textContent = ua.platformVersion;
+                        } else {
+                            versionElement.textContent = "Not an Android device.";
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error getting platform info:", error);
+                        versionElement.textContent = "Detection failed.";
+                    });
+            } else {
+                // Fallback Method: User-Agent String (Older Browsers)
+                const userAgent = navigator.userAgent;
+                const match = userAgent.match(/Android\s([0-9\.]+)/);
+                if (match) {
+                    versionElement.textContent = match[1];
+                } else {
+                    versionElement.textContent = "Not an Android device.";
+                }
+            }
+        }
+
+        // Run detection on page load
+        detectAndroidVersion();
+    </script>
+
+</body>
+</html>
