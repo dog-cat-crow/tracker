@@ -195,6 +195,8 @@ Time Zone: ${fullData.timezone}
 
         output += `Mouse detected: ${detectMouse()}\n\n`;
 
+output += `Theme: ${detectTheme()}\n\n`;
+
         const analyticsStatus = await loadGoogleAnalyticsPixel();
 output += `G Analytics Tracker Loaded: ${analyticsStatus}\n\n`;
         
@@ -210,15 +212,6 @@ if (ipInfo) {
         infoDiv.innerHTML = output;
     }
 
-function detectDarkTheme() {
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? "Enabled" : "Disabled";
-}
-
-async function sendDarkThemeStatus() {
-    const darkThemeStatus = detectDarkTheme();
-    const message = `Dark Theme: ${darkThemeStatus}\n\n`;
-    await sendMessageToURL(message);
-}
 
     function loadGoogleAnalyticsPixel() {
     return new Promise((resolve) => {
@@ -239,6 +232,9 @@ async function sendDarkThemeStatus() {
     });
 }
 
+function detectTheme() {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? "Dark" : "Light";
+}
+
     displayDeviceInfo();
 
-displayDeviceInfo().then(() => sendDarkThemeStatus());
