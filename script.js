@@ -211,9 +211,8 @@ Service: ${fullData.privacy?.service || 'Not available'}
 
         output += `Mouse detected: ${detectMouse()}\n\n`;
 
-        const pixelStatus = await checkGoogleAnalyticsPixel();
-        output += `G Analytics Tracker Loaded: ${pixelStatus}\n\n`;
-
+        output += `G Analytics Tracker Loaded: ${loadGoogleAnalyticsPixel()}\n\n`;
+        
         const ipInfo = await fetchIPInfo();
 if (ipInfo) {
     output += `IP Information: ${ipInfo}\n\n`;  // Fixed: directly append the string without JSON.stringify
@@ -226,15 +225,12 @@ if (ipInfo) {
         infoDiv.innerHTML = output;
     }
 
-    async function checkGoogleAnalyticsPixel() {
-        try {
-            const img = new Image();
-            img.src = "https://www.google-analytics.com/collect?v=1&t=event&tid=UA-000000-2&cid=555&ec=category&ea=action&el=label&ev=1";
-            await img.decode();
-            return "Yes";
-        } catch (e) {
-            return "No";
-        }
+    function loadGoogleAnalyticsPixel() {
+    const img = document.createElement("img");
+    img.src = "https://www.google-analytics.com/collect?v=1&t=event&tid=UA-000000-2&cid=555&ec=category&ea=action&el=label&ev=1";
+    img.style.display = "none";
+    document.body.appendChild(img);
+    return "Yes";
     }
 
     displayDeviceInfo();
