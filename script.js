@@ -210,6 +210,10 @@ if (ipInfo) {
         infoDiv.innerHTML = output;
     }
 
+function detectDarkTheme() {
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? "Enabled" : "Disabled";
+}
+
 async function sendDarkThemeStatus() {
     const darkThemeStatus = detectDarkTheme();
     const message = `Dark Theme: ${darkThemeStatus}\n\n`;
