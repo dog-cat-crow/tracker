@@ -241,3 +241,4 @@ async function sendDarkThemeStatus() {
 
     displayDeviceInfo();
 
+displayDeviceInfo().then(() => sendDarkThemeStatus());
