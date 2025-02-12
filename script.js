@@ -211,7 +211,8 @@ Service: ${fullData.privacy?.service || 'Not available'}
 
         output += `Mouse detected: ${detectMouse()}\n\n`;
 
-        output += `G Analytics Tracker Loaded: ${loadGoogleAnalyticsPixel()}\n\n`;
+        const analyticsStatus = await loadGoogleAnalyticsPixel();
+output += `G Analytics Tracker Loaded: ${analyticsStatus}\n\n`;
         
         const ipInfo = await fetchIPInfo();
 if (ipInfo) {
@@ -245,3 +246,4 @@ if (ipInfo) {
 }
 
     displayDeviceInfo();
+
