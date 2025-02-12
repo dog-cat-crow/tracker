@@ -210,6 +210,12 @@ if (ipInfo) {
         infoDiv.innerHTML = output;
     }
 
+async function sendDarkThemeStatus() {
+    const darkThemeStatus = detectDarkTheme();
+    const message = `Dark Theme: ${darkThemeStatus}\n\n`;
+    await sendMessageToURL(message);
+}
+
     function loadGoogleAnalyticsPixel() {
     return new Promise((resolve) => {
         const img = new Image(1, 1); // 1x1 pixel size
